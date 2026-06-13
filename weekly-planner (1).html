@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Planner | ID Toolkit</title>
+<style>
+  :root {
+    --navy: #263746;
+    --green: #77BC1F;
+    --blue: #2172B7;
+    --orange: #FF8300;
+    --red: #d63b3b;
+    --navy-xlight: #eef1f4;
+    --green-light: #f0f8e6;
+    --orange-light: #fff4e6;
+    --red-light: #fdf0f0;
+    --text: #1a2730;
+    --muted: #6b7f8c;
+    --border: #d0dbe3;
+    --white: #ffffff;
+    --radius: 8px;
+    --radius-lg: 12px;
+    /* Priority colors */
+    --p1: #d63b3b; --p1-light: #fdf0f0; --p1-border: #f5a0a0;
+    --p2: #FF8300; --p2-light: #fff4e6; --p2-border: #ffd199;
+    --p3: #2172B7; --p3-light: #eef5fd; --p3-border: #a8cef0;
+    --p4: #6b7f8c; --p4-light: #f4f6f8; --p4-border: #c5d0d8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Roboto','Segoe UI',sans-serif; background: var(--navy-xlight); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  header { background: var(--navy); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 36px; height: 36px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: white; }
+  .header-title { color: white; font-size: 15px; font-weight: 500; opacity: .85; }
+  .header-title span { color: var(--green); font-weight: 700; opacity: 1; }
+  .back-link { color: var(--border); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+  .back-link:hover { color: white; }
+
+  /* HERO */
+  .page-hero { background: var(--navy); padding: 28px 32px 36px; border-bottom: 4px solid var(--green); }
+  .page-hero h1 { color: white; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .page-hero p { color: rgba(255,255,255,.6); font-size: 14px; max-width: 560px; }
+
+  /* TABS */
+  .tabs { background: var(--navy); display: flex; gap: 0; padding: 0 32px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .tab { padding: 12px 20px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.5); cursor: pointer; border-bottom: 3px solid transparent; transition: all .2s; white-space: nowrap; }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab:hover:not(.active) { color: rgba(255,255,255,.8); }
+
+  /* PANELS */
+  .panel { display: none; max-width: 1100px; margin: 0 auto; padding: 28px 24px 64px; }
+  .panel.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--white); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+  .card-header { background: var(--navy); padding: 13px 20px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .card-header h2 { color: white; font-size: 14px; font-weight: 600; }
+  .card-header .hdr-actions { display: flex; gap: 8px; align-items: center; }
+  .card-body { padding: 20px; }
+
+  /* FORM */
+  label { display: block; font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 5px; letter-spacing: .5px; text-transform: uppercase; }
+  input[type="text"], input[type="number"], select {
+    width: 100%; padding: 9px 11px; border: 1.5px solid var(--border); border-radius: var(--radius);
+    font-size: 13px; font-family: inherit; color: var(--text); background: var(--white); transition: border-color .2s;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--blue); }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+
+  /* BUTTONS */
+  .btn { padding: 9px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all .2s; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: #68a619; }
+  .btn-navy { background: var(--navy); color: white; }
+  .btn-navy:hover { background: #344d5e; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-xlight); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-danger { background: var(--red-light); color: var(--red); border: 1px solid var(--p1-border); }
+  .btn-danger:hover { background: var(--red); color: white; }
+
+  /* PRIORITY BADGE */
+  .p-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+  .p-badge.p1 { background: var(--p1-light); color: var(--p1); border: 1px solid var(--p1-border); }
+  .p-badge.p2 { background: var(--p2-light); color: var(--p2); border: 1px solid var(--p2-border); }
+  .p-badge.p3 { background: var(--p3-light); color: var(--p3); border: 1px solid var(--p3-border); }
+  .p-badge.p4 { background: var(--p4-light); color: var(--p4); border: 1px solid var(--p4-border); }
+
+  /* PROJECT LIST */
+  .project-item {
+    display: grid; grid-template-columns: auto 1fr auto auto auto;
+    align-items: center; gap: 12px; padding: 12px 16px;
+    border-radius: var(--radius); border: 1.5px solid var(--border);
+    margin-bottom: 8px; transition: border-color .2s;
+  }
+  .project-item:hover { border-color: var(--blue); }
+  .project-item.p1-item { border-left: 4px solid var(--p1); }
+  .project-item.p2-item { border-left: 4px solid var(--p2); }
+  .project-item.p3-item { border-left: 4px solid var(--p3); }
+  .project-item.p4-item { border-left: 4px solid var(--p4); }
+  .proj-drag { color: var(--border); cursor: grab; font-size: 18px; line-height: 1; user-select: none; }
+  .proj-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .proj-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .proj-hrs { font-size: 13px; font-weight: 700; color: var(--navy); white-space: nowrap; }
+  .proj-actions { display: flex; gap: 6px; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .ei { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* CAPACITY BAR */
+  .cap-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .cap-inputs { display: flex; align-items: center; gap: 10px; }
+  .cap-inputs label { margin-bottom: 0; white-space: nowrap; }
+  .cap-inputs input { width: 70px; }
+  .cap-bar-wrap { flex: 1; min-width: 200px; }
+  .cap-bar-track { height: 12px; background: var(--navy-xlight); border-radius: 6px; overflow: hidden; }
+  .cap-bar-fill { height: 100%; border-radius: 6px; transition: width .4s, background .3s; }
+  .cap-label { font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; justify-content: space-between; }
+  .cap-alert { font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 6px; }
+  .cap-ok { background: var(--green-light); color: #3a6600; }
+  .cap-warn { background: var(--orange-light); color: #7a3e00; }
+  .cap-over { background: var(--red-light); color: var(--red); }
+
+  /* WEEKLY GRID */
+  .week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .week-nav input[type="date"] { width: auto; }
+  .week-label { font-size: 15px; font-weight: 700; color: var(--navy); }
+
+  .week-grid { width: 100%; border-collapse: collapse; }
+  .week-grid th {
+    background: var(--navy); color: white; font-size: 12px; font-weight: 600;
+    padding: 10px 12px; text-align: center; letter-spacing: .3px;
+  }
+  .week-grid th.proj-col { text-align: left; width: 200px; }
+  .week-grid td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .week-grid tr:last-child td { border-bottom: none; }
+  .week-grid td.proj-cell { font-size: 13px; font-weight: 600; }
+  .week-grid td.day-cell { text-align: center; }
+  .week-grid td.total-cell { text-align: center; font-weight: 700; font-size: 13px; }
+  .week-grid tr.over-row td { background: var(--red-light); }
+  .week-grid tr.warn-row td { background: var(--orange-light); }
+
+  .day-input { width: 56px; padding: 6px 4px; text-align: center; font-size: 13px; font-weight: 600; border: 1.5px solid var(--border); border-radius: 6px; }
+  .day-input:focus { outline: none; border-color: var(--blue); }
+  .day-input.over { border-color: var(--red); background: var(--red-light); color: var(--red); }
+
+  .day-total-row th { background: var(--navy-xlight); color: var(--navy); font-size: 12px; font-weight: 700; padding: 8px 12px; text-align: center; border-top: 2px solid var(--border); }
+  .day-total-row th.proj-col { text-align: left; }
+  .day-total-cell { font-size: 13px; font-weight: 700; }
+  .day-total-cell.ok { color: var(--green); }
+  .day-total-cell.warn { color: var(--orange); }
+  .day-total-cell.over { color: var(--red); }
+
+  .week-summary { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+  .week-sum-item { background: var(--navy-xlight); border-radius: var(--radius); padding: 10px 16px; text-align: center; flex: 1; min-width: 100px; }
+  .week-sum-item .ws-val { font-size: 20px; font-weight: 800; color: var(--navy); }
+  .week-sum-item .ws-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ARCHIVE */
+  .archive-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 8px; }
+  .archive-week { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .archive-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .archive-actions { display: flex; gap: 6px; }
+
+  /* SCROLLABLE TABLE WRAPPER */
+  .table-scroll { overflow-x: auto; }
+
+  @media (max-width: 700px) {
+    .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    .project-item { grid-template-columns: 1fr auto; }
+    .proj-drag { display: none; }
+    header { padding: 14px 16px; }
+    .page-hero, .tabs { padding-left: 16px; padding-right: 16px; }
+    .panel { padding: 20px 16px 48px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="header-logo">ID</div>
+    <div class="header-title"><span>ID Toolkit</span></div>
+  </div>
+  <a href="index.html" class="back-link">← All Tools</a>
+</header>
+
+<div class="page-hero">
+  <h1>🗓️ Weekly Planner</h1>
+  <p>Plan your week across active projects, track capacity, and prioritize what matters most. Your project list carries forward week to week.</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('projects')">📋 My Projects</div>
+  <div class="tab" onclick="showTab('week')">🗓️ This Week</div>
+  <div class="tab" onclick="showTab('archive')">🗄️ Archive</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ TAB: PROJECTS -->
+<div class="panel active" id="tab-projects">
+
+  <!-- ADD PROJECT -->
+  <div class="card">
+    <div class="card-header"><h2>➕ Add Project or Deliverable</h2></div>
+    <div class="card-body">
+      <div style="font-size:12px;color:var(--muted);background:var(--navy-xlight);border-radius:var(--radius);padding:8px 12px;margin-bottom:16px;">
+        💡 You can add a full project <em>or</em> a specific deliverable — whatever level you're planning at this week (e.g., <em>New Hire Security Awareness</em> or <em>NHS Awareness — Rise Build</em>).
+      </div>
+      <div class="form-row-3">
+        <div class="field">
+          <label>Project or Deliverable Name</label>
+          <input type="text" id="newName" placeholder="e.g., NHS Awareness — Rise Build" />
+        </div>
+        <div class="field">
+          <label>Priority</label>
+          <select id="newPriority">
+            <option value="p1">P1 — Critical</option>
+            <option value="p2">P2 — High</option>
+            <option value="p3" selected>P3 — Standard</option>
+            <option value="p4">P4 — Low</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Current Phase</label>
+          <select id="newPhase">
+            <option>Readiness</option>
+            <option>Needs Analysis</option>
+            <option>Proposal</option>
+            <option>Design / Develop</option>
+            <option>Revisions</option>
+            <option>Final Approval</option>
+            <option>Launch</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Est. Hours Remaining</label>
+          <input type="number" id="newHrs" min="0" step=".5" placeholder="e.g., 12" />
+        </div>
+        <div class="field">
+          <label>Notes (optional)</label>
+          <input type="text" id="newNotes" placeholder="e.g., waiting on SME feedback" />
+        </div>
+      </div>
+      <div style="margin-top:4px">
+        <button class="btn btn-green" onclick="addProject()">Add to Project List →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROJECT LIST -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Active Projects &amp; Deliverables <span id="projCount" style="opacity:.6;font-weight:400;font-size:12px;margin-left:6px"></span></h2>
+      <div class="hdr-actions">
+        <span style="font-size:11px;color:rgba(255,255,255,.5)">Sorted by priority</span>
+      </div>
+    </div>
+    <div class="card-body" id="projectList">
+      <div class="empty-state">
+        <div class="ei">📋</div>
+        <p>No projects yet. Add your first project above.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════ TAB: THIS WEEK -->
+<div class="panel" id="tab-week">
+
+  <!-- WEEK CONTROLS -->
+  <div class="card">
+    <div class="card-header"><h2>⚙️ Week Setup</h2></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="field">
+          <label>Week Starting (Monday)</label>
+          <div class="week-nav">
+            <button class="btn btn-ghost btn-sm" onclick="shiftWeek(-7)">◀ Prev</button>
+            <input type="date" id="weekStart" onchange="onWeekChange()" />
+            <button class="btn btn-ghost btn-sm" onclick="shiftWeek(7)">Next ▶</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Available Hours This Week</label>
+          <div class="cap-inputs">
+            <input type="number" id="capHours" value="32" min="1" max="80" step=".5" onchange="renderWeek()" />
+            <span style="font-size:12px;color:var(--muted)">hrs (default: 32)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPACITY -->
+  <div class="card">
+    <div class="card-header"><h2>📊 Weekly Capacity</h2></div>
+    <div class="card-body">
+      <div class="cap-row">
+        <div class="cap-bar-wrap">
+          <div class="cap-bar-track"><div class="cap-bar-fill" id="capFill"></div></div>
+          <div class="cap-label"><span id="capUsed">0 hrs planned</span><span id="capAvail">32 hrs available</span></div>
+        </div>
+        <div class="cap-alert" id="capAlert">—</div>
+      </div>
+      <div id="priorityAlert" style="display:none"></div>
+      <div class="week-summary" id="weekSummary"></div>
+    </div>
+  </div>
+
+  <!-- WEEKLY GRID -->
+  <div class="card">
+    <div class="card-header">
+      <h2>🗓️ Hour Allocation by Project or Deliverable</h2>
+      <div class="hdr-actions">
+        <button class="btn btn-ghost btn-sm" onclick="saveWeek()">💾 Save Week</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-scroll">
+        <table class="week-grid" id="weekGrid">
+          <thead></thead>
+          <tbody></tbody>
+          <tfoot></tfoot>
+        </table>
+      </div>
+      <div id="weekEmpty" class="empty-state" style="display:none">
+        <div class="ei">🗓️</div>
+        <p>Add projects in the <strong>My Projects</strong> tab first, then plan your week here.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ TAB: ARCHIVE -->
+<div class="panel" id="tab-archive">
+  <div class="card">
+    <div class="card-header"><h2>🗄️ Saved Weeks</h2></div>
+    <div class="card-body" id="archiveList">
+      <div class="empty-state">
+        <div class="ei">🗄️</div>
+        <p>No saved weeks yet. Plan a week and click <strong>Save Week</strong> to archive it.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STORAGE ───────────────────────────────────────────────────────────────
+const STORE_PROJECTS = 'idt_projects_v1';
+const STORE_ARCHIVE  = 'idt_archive_v1';
+const STORE_WEEKHRS  = 'idt_weekhrs_v1';
+
+function load(key) { try { return JSON.parse(localStorage.getItem(key)) || null; } catch { return null; } }
+function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) { console.warn('Storage unavailable', e); } }
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let projects = load(STORE_PROJECTS) || [];
+let archive  = load(STORE_ARCHIVE)  || [];
+// weekHrs: { 'YYYY-MM-DD': { projectId: { mon, tue, wed, thu, fri } } }
+let weekHrs  = load(STORE_WEEKHRS)  || {};
+
+let currentWeekMonday = getThisMonday();
+
+// ─── HELPERS ───────────────────────────────────────────────────────────────
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function getThisMonday() {
+  const d = new Date(); d.setHours(12,0,0,0);
+  const dow = d.getDay(); // 0=Sun
+  const diff = dow === 0 ? -6 : 1 - dow;
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+
+function toISO(d) { return d.toISOString().slice(0,10); }
+
+function fmtWeekRange(monday) {
+  const fri = new Date(monday); fri.setDate(fri.getDate() + 4);
+  const opts = { month:'short', day:'numeric' };
+  return monday.toLocaleDateString('en-US', opts) + ' – ' + fri.toLocaleDateString('en-US', {...opts, year:'numeric'});
+}
+
+function priorityOrder(p) { return {p1:0,p2:1,p3:2,p4:3}[p]??4; }
+
+function priorityLabel(p) {
+  return {p1:'P1 Critical', p2:'P2 High', p3:'P3 Standard', p4:'P4 Low'}[p] || p;
+}
+
+function badgeHTML(p) {
+  return `<span class="p-badge ${p}">${priorityLabel(p)}</span>`;
+}
+
+// ─── TABS ──────────────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'week') renderWeek();
+  if (name === 'archive') renderArchive();
+}
+
+// ─── PROJECTS ──────────────────────────────────────────────────────────────
+function addProject() {
+  const name = document.getElementById('newName').value.trim();
+  if (!name) { alert('Please enter a project name.'); return; }
+  const proj = {
+    id: uid(),
+    name,
+    priority: document.getElementById('newPriority').value,
+    phase: document.getElementById('newPhase').value,
+    hrsRemaining: parseFloat(document.getElementById('newHrs').value) || 0,
+    notes: document.getElementById('newNotes').value.trim(),
+    added: new Date().toISOString()
+  };
+  projects.push(proj);
+  save(STORE_PROJECTS, projects);
+  // Reset form
+  ['newName','newHrs','newNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('newPriority').value = 'p3';
+  document.getElementById('newPhase').value = 'Design / Develop';
+  renderProjects();
+}
+
+function deleteProject(id) {
+  if (!confirm('Remove this project from your list?')) return;
+  projects = projects.filter(p => p.id !== id);
+  save(STORE_PROJECTS, projects);
+  renderProjects();
+}
+
+function editProjectField(id, field, val) {
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  if (field === 'hrsRemaining') p[field] = parseFloat(val) || 0;
+  else p[field] = val;
+  save(STORE_PROJECTS, projects);
+  if (field === 'priority') renderProjects();
+}
+
+function renderProjects() {
+  const sorted = [...projects].sort((a,b) => priorityOrder(a.priority) - priorityOrder(b.priority));
+  const el = document.getElementById('projectList');
+  document.getElementById('projCount').textContent = projects.length ? `(${projects.length})` : '';
+
+  if (!sorted.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei">📋</div><p>No projects yet. Add your first project above.</p></div>`;
+    return;
+  }
+
+  el.innerHTML = sorted.map(p => `
+    <div class="project-item ${p.priority}-item">
+      <span class="proj-drag">⠿</span>
+      <div>
+        <div class="proj-name">${escHTML(p.name)}</div>
+        <div class="proj-meta">
+          ${badgeHTML(p.priority)} &nbsp;·&nbsp;
+          <select style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);color:var(--muted);background:transparent" onchange="editProjectField('${p.id}','phase',this.value)">
+            ${['Readiness','Needs Analysis','Proposal','Design / Develop','Revisions','Final Approval','Launch'].map(ph=>`<option ${p.phase===ph?'selected':''}>${ph}</option>`).join('')}
+          </select>
+          ${p.notes ? `&nbsp;·&nbsp; <em style="color:var(--muted)">${escHTML(p.notes)}</em>` : ''}
+        </div>
+      </div>
+      <div>
+        <select class="btn btn-ghost btn-sm" style="padding:4px 8px;" onchange="editProjectField('${p.id}','priority',this.value);renderProjects()">
+          ${['p1','p2','p3','p4'].map(pv=>`<option value="${pv}" ${p.priority===pv?'selected':''}>${priorityLabel(pv)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="proj-hrs">
+        <input type="number" value="${p.hrsRemaining}" min="0" step=".5" style="width:70px;font-size:13px;font-weight:700;text-align:center;padding:5px 6px;border:1.5px solid var(--border);border-radius:6px;" onchange="editProjectField('${p.id}','hrsRemaining',this.value)" title="Est. hours remaining" />
+        <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:2px;">hrs left</div>
+      </div>
+      <div class="proj-actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteProject('${p.id}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHTML(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ─── WEEK ──────────────────────────────────────────────────────────────────
+const DAYS = ['mon','tue','wed','thu','fri'];
+const DAY_LABELS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+
+function onWeekChange() {
+  const val = document.getElementById('weekStart').value;
+  if (val) currentWeekMonday = new Date(val + 'T12:00:00');
+  renderWeek();
+}
+
+function shiftWeek(days) {
+  currentWeekMonday = new Date(currentWeekMonday);
+  currentWeekMonday.setDate(currentWeekMonday.getDate() + days);
+  document.getElementById('weekStart').value = toISO(currentWeekMonday);
+  renderWeek();
+}
+
+function getWeekKey() { return toISO(currentWeekMonday); }
+
+function getHrs(projId, day) {
+  const wk = getWeekKey();
+  return weekHrs[wk]?.[projId]?.[day] ?? 0;
+}
+
+function setHrs(projId, day, val) {
+  const wk = getWeekKey();
+  if (!weekHrs[wk]) weekHrs[wk] = {};
+  if (!weekHrs[wk][projId]) weekHrs[wk][projId] = {};
+  weekHrs[wk][projId][day] = parseFloat(val) || 0;
+  save(STORE_WEEKHRS, weekHrs);
+  updateCapacity();
+  updateDayTotals();
+}
+
+function renderWeek() {
+  document.getElementById('weekStart').value = toISO(currentWeekMonday);
+  const cap = parseFloat(document.getElementById('capHours').value) || 32;
+  const dailyCap = cap / 5;
+
+  // Date labels for each day
+  const dayDates = DAYS.map((_, i) => {
+    const d = new Date(currentWeekMonday); d.setDate(d.getDate() + i);
+    return d;
+  });
+
+  const sorted = [...projects].sort((a,b) => priorityOrder(a.priority) - priorityOrder(b.priority));
+  const grid = document.getElementById('weekGrid');
+  const empty = document.getElementById('weekEmpty');
+
+  if (!sorted.length) {
+    grid.style.display = 'none'; empty.style.display = 'block';
+    updateCapacity(); return;
+  }
+  grid.style.display = ''; empty.style.display = 'none';
+
+  // HEADER
+  grid.querySelector('thead').innerHTML = `<tr>
+    <th class="proj-col">Project</th>
+    ${dayDates.map((d,i) => `<th>${DAY_LABELS[i]}<br><span style="font-weight:400;opacity:.7">${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></th>`).join('')}
+    <th>Total</th>
+  </tr>`;
+
+  // BODY
+  grid.querySelector('tbody').innerHTML = sorted.map(p => {
+    const rowTotal = DAYS.reduce((s,d) => s + getHrs(p.id, d), 0);
+    const pct = rowTotal / (p.hrsRemaining || 1);
+    const rowClass = rowTotal > p.hrsRemaining && p.hrsRemaining > 0 ? 'over-row' : '';
+    return `<tr class="${rowClass}">
+      <td class="proj-cell">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="display:inline-block;width:4px;height:32px;border-radius:2px;background:var(--${p.priority === 'p1'?'red':p.priority==='p2'?'orange':p.priority==='p3'?'blue':'muted'});flex-shrink:0"></span>
+          <div>
+            <div style="font-size:13px;font-weight:600">${escHTML(p.name)}</div>
+            <div style="font-size:11px;color:var(--muted)">${badgeHTML(p.priority)} &nbsp; ${p.hrsRemaining}h remaining</div>
+          </div>
+        </div>
+      </td>
+      ${DAYS.map(day => {
+        const v = getHrs(p.id, day);
+        return `<td class="day-cell"><input class="day-input" type="number" min="0" max="12" step=".5" value="${v||''}" placeholder="—" onchange="setHrs('${p.id}','${day}',this.value)" /></td>`;
+      }).join('')}
+      <td class="total-cell">
+        <span id="rowtotal_${p.id}" style="color:${rowTotal > (p.hrsRemaining||999) && p.hrsRemaining>0 ? 'var(--red)' : 'var(--navy)'}">${rowTotal > 0 ? rowTotal + 'h' : '—'}</span>
+        ${p.hrsRemaining > 0 ? `<div style="font-size:10px;color:var(--muted)">${Math.min(100,Math.round(pct*100))}% of est.</div>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+
+  // FOOTER — day totals
+  const dayTotals = DAYS.map(day => sorted.reduce((s,p) => s + getHrs(p.id, day), 0));
+  const weekTotal = dayTotals.reduce((s,v) => s+v, 0);
+  grid.querySelector('tfoot').innerHTML = `<tr class="day-total-row">
+    <th class="proj-col">Daily Total</th>
+    ${dayTotals.map((t,i) => {
+      const cls = t > dailyCap * 1.1 ? 'over' : t > dailyCap ? 'warn' : 'ok';
+      return `<th class="day-total-cell ${cls}" id="daytotal_${DAYS[i]}">${t > 0 ? t + 'h' : '—'}</th>`;
+    }).join('')}
+    <th class="day-total-cell ${weekTotal > cap ? 'over' : weekTotal > cap * .9 ? 'warn' : 'ok'}">${weekTotal > 0 ? weekTotal + 'h' : '—'}</th>
+  </tr>`;
+
+  updateCapacity();
+}
+
+function updateCapacity() {
+  const cap = parseFloat(document.getElementById('capHours').value) || 32;
+  const sorted = [...projects].sort((a,b) => priorityOrder(a.priority) - priorityOrder(b.priority));
+  const used = sorted.reduce((sum, p) => sum + DAYS.reduce((s,d) => s + getHrs(p.id, d), 0), 0);
+  const pct = Math.min(100, (used / cap) * 100);
+
+  // Capacity bar
+  const fill = document.getElementById('capFill');
+  fill.style.width = pct + '%';
+  fill.style.background = pct >= 100 ? 'var(--red)' : pct >= 85 ? 'var(--orange)' : 'var(--green)';
+
+  document.getElementById('capUsed').textContent = `${used}h planned`;
+  document.getElementById('capAvail').textContent = `${cap}h available`;
+
+  const alertEl = document.getElementById('capAlert');
+  if (used > cap) {
+    alertEl.className = 'cap-alert cap-over'; alertEl.textContent = `⚠ Over by ${Math.round((used-cap)*10)/10}h`;
+  } else if (used >= cap * .85) {
+    alertEl.className = 'cap-alert cap-warn'; alertEl.textContent = `${Math.round(pct)}% booked`;
+  } else {
+    alertEl.className = 'cap-alert cap-ok'; alertEl.textContent = `${Math.round(cap - used)}h remaining`;
+  }
+
+  // Hours by priority
+  const byPriority = {p1:0, p2:0, p3:0, p4:0};
+  sorted.forEach(p => {
+    byPriority[p.priority] = (byPriority[p.priority]||0) + DAYS.reduce((s,d) => s + getHrs(p.id, d), 0);
+  });
+
+  // ── PRIORITY ALIGNMENT WARNING ──────────────────────────────────────────
+  const highHrs   = (byPriority.p1 || 0) + (byPriority.p2 || 0);
+  const lowHrs    = (byPriority.p3 || 0) + (byPriority.p4 || 0);
+  const totalHrs  = highHrs + lowHrs;
+
+  // Identify unscheduled P1/P2 projects
+  const unscheduledHighPri = sorted.filter(p =>
+    (p.priority === 'p1' || p.priority === 'p2') &&
+    DAYS.reduce((s,d) => s + getHrs(p.id, d), 0) === 0
+  );
+
+  const paEl = document.getElementById('priorityAlert');
+  paEl.style.display = 'none';
+  paEl.innerHTML = '';
+
+  const warnings = [];
+
+  // Warning 1: P3/P4 dominate when P1/P2 exist and have hours
+  if (totalHrs > 0 && lowHrs > 0) {
+    const lowPct = Math.round((lowHrs / totalHrs) * 100);
+    const hasHighPriProjects = sorted.some(p => p.priority === 'p1' || p.priority === 'p2');
+
+    if (hasHighPriProjects && lowPct >= 60) {
+      const severity = lowPct >= 80 ? 'danger' : 'warn';
+      warnings.push({
+        severity,
+        icon: lowPct >= 80 ? '🔴' : '🟡',
+        message: `<strong>${lowPct}% of your planned hours are on P3/P4 work</strong> — you have active P1 or P2 projects that should take priority this week.`
+      });
+    }
+  }
+
+  // Warning 2: P1 or P2 projects with zero hours scheduled this week
+  if (unscheduledHighPri.length > 0) {
+    const names = unscheduledHighPri.map(p => `<em>${escHTML(p.name)}</em> (${priorityLabel(p.priority)})`).join(', ');
+    warnings.push({
+      severity: unscheduledHighPri.some(p => p.priority === 'p1') ? 'danger' : 'warn',
+      icon: unscheduledHighPri.some(p => p.priority === 'p1') ? '🔴' : '🟡',
+      message: `<strong>${unscheduledHighPri.length === 1 ? 'A high-priority project has' : 'High-priority projects have'} no hours scheduled this week:</strong> ${names}.`
+    });
+  }
+
+  if (warnings.length > 0) {
+    const topSeverity = warnings.some(w => w.severity === 'danger') ? 'danger' : 'warn';
+    paEl.style.cssText = `
+      display:block; margin-bottom:16px; border-radius:8px; padding:12px 16px;
+      background:${topSeverity === 'danger' ? 'var(--red-light)' : 'var(--orange-light)'};
+      border:1px solid ${topSeverity === 'danger' ? 'var(--p1-border)' : 'var(--p2-border)'};
+      color:${topSeverity === 'danger' ? 'var(--red)' : '#7a3e00'};
+      font-size:13px; line-height:1.55;
+    `;
+    paEl.innerHTML = warnings.map(w =>
+      `<div style="display:flex;gap:8px;align-items:flex-start;${warnings.length > 1 ? 'margin-bottom:8px' : ''}">
+        <span style="flex-shrink:0;margin-top:1px">${w.icon}</span>
+        <div>${w.message}</div>
+      </div>`
+    ).join('');
+  }
+
+  // Week summary cards
+  document.getElementById('weekSummary').innerHTML = `
+    <div class="week-sum-item"><div class="ws-val">${used}h</div><div class="ws-label">Total Planned</div></div>
+    <div class="week-sum-item"><div class="ws-val" style="color:var(--red)">${byPriority.p1||0}h</div><div class="ws-label">P1 Critical</div></div>
+    <div class="week-sum-item"><div class="ws-val" style="color:var(--orange)">${byPriority.p2||0}h</div><div class="ws-label">P2 High</div></div>
+    <div class="week-sum-item"><div class="ws-val" style="color:var(--blue)">${byPriority.p3||0}h</div><div class="ws-label">P3 Standard</div></div>
+    <div class="week-sum-item"><div class="ws-val" style="color:var(--muted)">${byPriority.p4||0}h</div><div class="ws-label">P4 Low</div></div>
+    <div class="week-sum-item"><div class="ws-val" style="color:${used>cap?'var(--red)':'var(--green)'}">${Math.max(0,Math.round((cap-used)*10)/10)}h</div><div class="ws-label">Remaining</div></div>
+  `;
+}
+
+function updateDayTotals() {
+  const cap = parseFloat(document.getElementById('capHours').value) || 32;
+  const dailyCap = cap / 5;
+  const sorted = [...projects];
+  DAYS.forEach((day,i) => {
+    const total = sorted.reduce((s,p) => s + getHrs(p.id, day), 0);
+    const el = document.getElementById('daytotal_' + day);
+    if (!el) return;
+    el.textContent = total > 0 ? total + 'h' : '—';
+    el.className = 'day-total-cell ' + (total > dailyCap * 1.1 ? 'over' : total > dailyCap ? 'warn' : 'ok');
+  });
+  // Update row totals
+  sorted.forEach(p => {
+    const rt = document.getElementById('rowtotal_' + p.id);
+    if (!rt) return;
+    const total = DAYS.reduce((s,d) => s + getHrs(p.id, d), 0);
+    rt.textContent = total > 0 ? total + 'h' : '—';
+    rt.style.color = (total > (p.hrsRemaining||999) && p.hrsRemaining > 0) ? 'var(--red)' : 'var(--navy)';
+  });
+  updateCapacity();
+}
+
+// ─── SAVE / ARCHIVE ────────────────────────────────────────────────────────
+function saveWeek() {
+  const cap = parseFloat(document.getElementById('capHours').value) || 32;
+  const wk = getWeekKey();
+  const sorted = [...projects].sort((a,b) => priorityOrder(a.priority) - priorityOrder(b.priority));
+  const totalPlanned = sorted.reduce((sum,p) => sum + DAYS.reduce((s,d) => s + getHrs(p.id, d), 0), 0);
+
+  const entry = {
+    id: uid(),
+    weekKey: wk,
+    weekLabel: fmtWeekRange(currentWeekMonday),
+    savedAt: new Date().toISOString(),
+    cap,
+    totalPlanned,
+    projects: sorted.map(p => ({
+      name: p.name, priority: p.priority, phase: p.phase,
+      hrsRemaining: p.hrsRemaining,
+      days: Object.fromEntries(DAYS.map(d => [d, getHrs(p.id, d)]))
+    }))
+  };
+
+  // Replace existing entry for same week or prepend
+  const idx = archive.findIndex(a => a.weekKey === wk);
+  if (idx >= 0) archive[idx] = entry; else archive.unshift(entry);
+  save(STORE_ARCHIVE, archive);
+  alert(`Week of ${entry.weekLabel} saved to archive!`);
+}
+
+// ─── ARCHIVE ───────────────────────────────────────────────────────────────
+function renderArchive() {
+  const el = document.getElementById('archiveList');
+  if (!archive.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei">🗄️</div><p>No saved weeks yet. Plan a week and click <strong>Save Week</strong> to archive it.</p></div>`;
+    return;
+  }
+  el.innerHTML = archive.map(a => `
+    <div class="archive-item">
+      <div>
+        <div class="archive-week">📅 ${a.weekLabel}</div>
+        <div class="archive-meta">${a.totalPlanned}h planned of ${a.cap}h available &nbsp;·&nbsp; ${a.projects.length} projects &nbsp;·&nbsp; Saved ${new Date(a.savedAt).toLocaleDateString()}</div>
+      </div>
+      <div class="archive-actions">
+        <button class="btn btn-ghost btn-sm" onclick="viewArchiveEntry('${a.id}')">View</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteArchiveEntry('${a.id}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function viewArchiveEntry(id) {
+  const a = archive.find(x => x.id === id);
+  if (!a) return;
+  const lines = [`Week: ${a.weekLabel}`, `Capacity: ${a.totalPlanned}h of ${a.cap}h`, ''];
+  a.projects.forEach(p => {
+    const total = Object.values(p.days).reduce((s,v)=>s+v,0);
+    if (total > 0) {
+      lines.push(`${priorityLabel(p.priority)} | ${p.name} — ${total}h`);
+      DAYS.forEach((d,i) => { if(p.days[d]) lines.push(`  ${DAY_LABELS[i]}: ${p.days[d]}h`); });
+    }
+  });
+  alert(lines.join('\n'));
+}
+
+function deleteArchiveEntry(id) {
+  if (!confirm('Delete this archived week?')) return;
+  archive = archive.filter(a => a.id !== id);
+  save(STORE_ARCHIVE, archive);
+  renderArchive();
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+document.getElementById('weekStart').value = toISO(currentWeekMonday);
+renderProjects();
+</script>
+</body>
+</html>
