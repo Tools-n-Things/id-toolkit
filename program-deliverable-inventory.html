@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Program Deliverable Inventory | ID Toolkit</title>
+<style>
+  :root {
+    --navy: #263746; --green: #77BC1F; --blue: #2172B7; --orange: #FF8300; --red: #d63b3b;
+    --navy-xlight: #eef1f4; --green-light: #f0f8e6; --orange-light: #fff4e6; --red-light: #fdf0f0; --blue-light: #eef5fd;
+    --text: #1a2730; --muted: #6b7f8c; --border: #d0dbe3; --white: #ffffff;
+    --radius: 8px; --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Roboto','Segoe UI',sans-serif; background: var(--navy-xlight); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--navy); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 36px; height: 36px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: white; }
+  .header-title { color: white; font-size: 15px; font-weight: 500; opacity: .85; }
+  .header-title span { color: var(--green); font-weight: 700; opacity: 1; }
+  .back-link { color: var(--border); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+  .back-link:hover { color: white; }
+
+  .page-hero { background: var(--navy); padding: 28px 32px 0; border-bottom: 4px solid var(--green); }
+  .page-hero h1 { color: white; font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .page-hero p { color: rgba(255,255,255,.6); font-size: 13px; max-width: 640px; padding-bottom: 0; }
+
+  /* TABS */
+  .tabs { background: var(--navy); display: flex; gap: 0; padding: 16px 32px 0; }
+  .tab { padding: 12px 20px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.5); cursor: pointer; border-bottom: 3px solid transparent; transition: all .2s; white-space: nowrap; border-radius: 8px 8px 0 0; }
+  .tab.active { color: white; border-bottom-color: var(--green); background: rgba(255,255,255,.05); }
+  .tab:hover:not(.active) { color: rgba(255,255,255,.8); }
+  .tab.designer-tab { color: rgba(33,114,183,.8); }
+  .tab.designer-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab.joint-tab { color: rgba(119,188,31,.8); }
+  .tab.joint-tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+  .panel { display: none; max-width: 1200px; margin: 0 auto; padding: 24px 24px 64px; }
+  .panel.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--white); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+  .card-header { background: var(--navy); padding: 13px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .card-header h2 { color: white; font-size: 14px; font-weight: 600; }
+  .card-header .hdr-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .card-body { padding: 20px; }
+
+  /* FORM */
+  label { display: block; font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 5px; letter-spacing: .5px; text-transform: uppercase; }
+  input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 9px 11px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; color: var(--text); background: var(--white); transition: border-color .2s; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+
+  /* BUTTONS */
+  .btn { padding: 9px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: #68a619; }
+  .btn-navy { background: var(--navy); color: white; }
+  .btn-navy:hover { background: #344d5e; }
+  .btn-blue { background: var(--blue); color: white; }
+  .btn-blue:hover { background: #1860a0; }
+  .btn-orange { background: var(--orange); color: white; }
+  .btn-orange:hover { background: #e07500; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-xlight); }
+  .btn-danger { background: var(--red-light); color: var(--red); border: 1px solid #f5a0a0; }
+  .btn-danger:hover { background: var(--red); color: white; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+  /* SHARE CODE */
+  .share-box { background: var(--navy-xlight); border-radius: var(--radius); padding: 16px; border: 1.5px solid var(--border); }
+  .share-box h3 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+  .share-code-area { width: 100%; height: 80px; font-family: monospace; font-size: 11px; padding: 8px; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; resize: none; }
+  .share-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+
+  /* DELIVERABLE ROWS — TRAINER */
+  .deliverable-list { display: flex; flex-direction: column; gap: 10px; }
+  .del-card { border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color .2s; }
+  .del-card:hover { border-color: var(--blue); }
+  .del-card.has-dep { border-left: 4px solid var(--orange); }
+  .del-card.dep-critical { border-left: 4px solid var(--red); }
+  .del-card-header { background: var(--navy-xlight); padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .del-num { width: 24px; height: 24px; background: var(--navy); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+  .del-title-display { flex: 1; font-size: 13px; font-weight: 600; color: var(--navy); }
+  .del-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .del-card-body { padding: 14px; background: white; display: none; }
+  .del-card-body.open { display: block; }
+  .del-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .del-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  /* CONDITION SELECTOR */
+  .condition-sel { display: flex; gap: 6px; flex-wrap: wrap; }
+  .cond-opt input { display: none; }
+  .cond-box { padding: 6px 12px; border-radius: 6px; border: 2px solid var(--border); font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s; color: var(--muted); white-space: nowrap; }
+  .cond-opt input:checked + .cond-box { color: white; border-color: transparent; }
+  .cond-opt:nth-child(1) input:checked + .cond-box { background: var(--green); }
+  .cond-opt:nth-child(2) input:checked + .cond-box { background: var(--blue); }
+  .cond-opt:nth-child(3) input:checked + .cond-box { background: var(--orange); }
+  .cond-opt:nth-child(4) input:checked + .cond-box { background: var(--red); }
+
+  /* BADGES */
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 5px; white-space: nowrap; }
+  .badge-green  { background: var(--green-light); color: #3a6600; border: 1px solid #b7df7a; }
+  .badge-blue   { background: var(--blue-light); color: #0d4a80; border: 1px solid #a8cef0; }
+  .badge-orange { background: var(--orange-light); color: #7a3e00; border: 1px solid #ffd199; }
+  .badge-red    { background: var(--red-light); color: var(--red); border: 1px solid #f5a0a0; }
+  .badge-muted  { background: var(--navy-xlight); color: var(--muted); border: 1px solid var(--border); }
+  .badge-navy   { background: var(--navy); color: white; border: 1px solid var(--navy); }
+
+  /* DEPENDENCY FLAG */
+  .dep-flag { background: var(--orange-light); border: 1px solid #ffd199; border-radius: var(--radius); padding: 8px 12px; margin-top: 8px; font-size: 12px; color: #7a3e00; display: flex; gap: 8px; align-items: flex-start; }
+  .dep-flag.critical { background: var(--red-light); border-color: #f5a0a0; color: var(--red); }
+  .dep-flag-icon { flex-shrink: 0; font-size: 14px; }
+
+  /* DESIGNER LAYER */
+  .designer-layer { background: var(--blue-light); border: 1.5px solid #a8cef0; border-radius: var(--radius); padding: 14px; margin-top: 12px; }
+  .designer-layer-label { font-size: 11px; font-weight: 800; color: var(--blue); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .rebuild-sel { display: flex; gap: 6px; flex-wrap: wrap; }
+  .rb-opt input { display: none; }
+  .rb-box { padding: 6px 12px; border-radius: 6px; border: 2px solid var(--border); font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s; color: var(--muted); }
+  .rb-opt input:checked + .rb-box { color: white; border-color: transparent; }
+  .rb-opt:nth-child(1) input:checked + .rb-box { background: var(--green); }
+  .rb-opt:nth-child(2) input:checked + .rb-box { background: var(--blue); }
+  .rb-opt:nth-child(3) input:checked + .rb-box { background: var(--orange); }
+  .rb-opt:nth-child(4) input:checked + .rb-box { background: var(--red); }
+
+  /* SUMMARY STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-item { background: var(--navy-xlight); border-radius: var(--radius); padding: 12px; text-align: center; }
+  .stat-item .sv { font-size: 22px; font-weight: 900; color: var(--navy); }
+  .stat-item .sl { font-size: 10px; color: var(--muted); margin-top: 2px; font-weight: 600; text-transform: uppercase; }
+  .stat-item.highlight { background: var(--navy); }
+  .stat-item.highlight .sv { color: var(--green); }
+  .stat-item.highlight .sl { color: rgba(255,255,255,.5); }
+
+  /* JOINT VIEW TABLE */
+  .joint-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .joint-table th { background: var(--navy); color: white; padding: 10px 10px; font-size: 11px; font-weight: 600; text-align: left; white-space: nowrap; position: sticky; top: 0; }
+  .joint-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .joint-table tr:nth-child(even) td { background: var(--navy-xlight); }
+  .joint-table tr:hover td { background: #e0eaf2; }
+  .joint-table tr.dep-row td { border-left: 3px solid var(--orange); }
+  .joint-table tr.dep-critical-row td { border-left: 3px solid var(--red); }
+  .table-scroll { overflow-x: auto; }
+  .joint-name { font-weight: 600; color: var(--navy); }
+  .joint-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+  /* PHASE ASSIGNMENT */
+  .phase-pill { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: var(--navy); color: white; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+  .empty-state .ei { font-size: 40px; margin-bottom: 12px; }
+
+  /* TRAINER HINT BOX */
+  .hint-box { background: linear-gradient(135deg, #1e4d6b, #263746); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 20px; }
+  .hint-box h3 { color: var(--green); font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .hint-box p { color: rgba(255,255,255,.75); font-size: 13px; line-height: 1.6; }
+  .hint-box .hint-steps { display: flex; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
+  .hint-step { background: rgba(255,255,255,.08); border-radius: var(--radius); padding: 10px 14px; flex: 1; min-width: 160px; }
+  .hint-step .hs-num { color: var(--green); font-size: 18px; font-weight: 900; }
+  .hint-step .hs-text { color: rgba(255,255,255,.7); font-size: 12px; margin-top: 2px; line-height: 1.4; }
+
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(3,1fr); }
+    .del-grid, .del-grid-2, .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    header, .page-hero { padding-left: 16px; padding-right: 16px; }
+    .tabs { padding-left: 16px; }
+    .panel { padding: 16px 16px 48px; }
+  }
+
+  @media print {
+    header, .page-hero, .tabs, .card:not(.print-card), .btn, .hint-box { display: none !important; }
+    .panel { display: block !important; padding: 0; max-width: 100%; }
+    .print-card { display: block !important; }
+    body { background: white; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="header-logo">ID</div>
+    <div class="header-title"><span>ID Toolkit</span></div>
+  </div>
+  <a href="index.html" class="back-link">← All Tools</a>
+</header>
+
+<div class="page-hero">
+  <h1>📦 Program Deliverable Inventory</h1>
+  <p>Catalog every piece of content in a program before the Architecture meeting. Trainers complete Tab 1 — designers review and add estimates in Tab 2 — everyone aligns in Tab 3.</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('trainer')" id="tab-btn-trainer">📋 Trainer View</div>
+  <div class="tab designer-tab" onclick="showTab('designer')" id="tab-btn-designer">🎨 Designer Review</div>
+  <div class="tab joint-tab" onclick="showTab('joint')" id="tab-btn-joint">🤝 Program Inventory</div>
+</div>
+
+<!-- ══════════════════════════════════════════ TRAINER TAB -->
+<div class="panel active" id="tab-trainer">
+
+  <div class="hint-box">
+    <h3>👋 Hey Trainer — this is your tab</h3>
+    <p>Before your Architecture meeting with the design team, catalog every piece of content in your program below. Don't worry about design jargon — just tell us what exists, how long it takes, and how current it is. Your answers help the team understand what they're working with before they start planning.</p>
+    <div class="hint-steps">
+      <div class="hint-step"><div class="hs-num">1</div><div class="hs-text">Fill in the program info above</div></div>
+      <div class="hint-step"><div class="hs-num">2</div><div class="hs-text">Add every piece of content — ILT sessions, eLearning, job aids, videos, etc.</div></div>
+      <div class="hint-step"><div class="hs-num">3</div><div class="hs-text">Flag anything that affects other content when it changes</div></div>
+      <div class="hint-step"><div class="hs-num">4</div><div class="hs-text">Export your Share Code and send it to your designer</div></div>
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="card">
+    <div class="card-header"><h2>📋 Program Info</h2></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="field"><label>Program Name</label><input type="text" id="t-programName" placeholder="e.g., Meters | Entry-Level" oninput="syncMeta()" /></div>
+        <div class="field"><label>Completed By</label><input type="text" id="t-completedBy" placeholder="Your name" oninput="syncMeta()" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Total Program Length</label><input type="text" id="t-programLength" placeholder="e.g., 3 weeks, 15 days" oninput="syncMeta()" /></div>
+        <div class="field"><label>Target Audience</label><input type="text" id="t-audience" placeholder="e.g., New Hire Field Technicians" oninput="syncMeta()" /></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD DELIVERABLE -->
+  <div class="card">
+    <div class="card-header">
+      <h2>➕ Add Content Piece</h2>
+      <button class="btn btn-green btn-sm" onclick="addDeliverable()">+ Add to Inventory</button>
+    </div>
+    <div class="card-body">
+      <div class="form-row-3">
+        <div class="field"><label>Content Name</label><input type="text" id="new-name" placeholder="e.g., Meter Reading ILT — Day 1" /></div>
+        <div class="field">
+          <label>Type of Content</label>
+          <select id="new-type">
+            <option value="">— Select type —</option>
+            <option>ILT Session (live, in-person or virtual)</option>
+            <option>eLearning (self-paced online course)</option>
+            <option>Job Aid / Quick Reference Guide</option>
+            <option>Video</option>
+            <option>Assessment / Quiz</option>
+            <option>Facilitator Guide</option>
+            <option>Participant Workbook</option>
+            <option>SOP / Process Document</option>
+            <option>OJT / On-the-Job Practice</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>How Long Does It Take? (mins)</label><input type="number" id="new-duration" min="0" placeholder="e.g., 60" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>What Does It Cover?</label><input type="text" id="new-desc" placeholder="Brief description of what this content teaches or does" /></div>
+        <div class="field"><label>Where Does It Live? (LMS path, folder, link)</label><input type="text" id="new-location" placeholder="e.g., LMS > Meters > Entry Level > Module 1" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Current Condition</label>
+          <div class="condition-sel" id="new-condition-sel">
+            <label class="cond-opt"><input type="radio" name="new-cond" value="current" /><div class="cond-box">✓ Current & Accurate</div></label>
+            <label class="cond-opt"><input type="radio" name="new-cond" value="minor" /><div class="cond-box">~ Minor Updates Needed</div></label>
+            <label class="cond-opt"><input type="radio" name="new-cond" value="outdated" /><div class="cond-box">⚠ Outdated</div></label>
+            <label class="cond-opt"><input type="radio" name="new-cond" value="broken" /><div class="cond-box">✕ Broken / Unusable</div></label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Does It Need Updating?</label>
+          <select id="new-needsUpdate">
+            <option value="">— Select —</option>
+            <option value="yes-urgent">Yes — urgently, learners are getting wrong info now</option>
+            <option value="yes-soon">Yes — before next delivery</option>
+            <option value="yes-eventually">Yes — eventually but not urgent</option>
+            <option value="no">No — content is fine as-is</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>⚠ Does changing this affect other content? (Dependencies)</label>
+          <select id="new-hasDep">
+            <option value="none">No — this piece stands alone</option>
+            <option value="outbound">Yes — other content references or builds on THIS piece</option>
+            <option value="inbound">Yes — THIS piece references or depends on other content</option>
+            <option value="both">Yes — both directions (this is a hub piece)</option>
+          </select>
+        </div>
+        <div class="field"><label>Dependency Notes (what connects to what?)</label><input type="text" id="new-depNotes" placeholder="e.g., Module 3 quiz references scenarios from this ILT" /></div>
+      </div>
+      <div class="field"><label>Trainer Notes (anything the designer should know)</label><textarea id="new-trainerNotes" rows="2" placeholder="e.g., This session always runs long. Participants struggle with the scenario section."></textarea></div>
+    </div>
+  </div>
+
+  <!-- DELIVERABLE LIST -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📦 Content Inventory <span id="t-count" style="opacity:.6;font-weight:400;font-size:12px;margin-left:6px"></span></h2>
+      <div class="hdr-right">
+        <button class="btn btn-ghost btn-sm" onclick="clearAll()">↺ Clear All</button>
+      </div>
+    </div>
+    <div class="card-body" id="trainerList">
+      <div class="empty-state"><div class="ei">📦</div><p>No content added yet. Use the form above to add pieces one at a time.</p></div>
+    </div>
+  </div>
+
+  <!-- SHARE -->
+  <div class="card">
+    <div class="card-header"><h2>📤 Share with Your Designer</h2></div>
+    <div class="card-body">
+      <div class="share-box">
+        <h3>Export Share Code</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Click Export to generate a code. Copy it and send it to your designer via email or Teams. They'll paste it into their Designer Review tab.</p>
+        <textarea class="share-code-area" id="exportCode" placeholder="Your share code will appear here after clicking Export..." readonly></textarea>
+        <div class="share-row">
+          <button class="btn btn-navy" onclick="exportCode()">📤 Export Share Code</button>
+          <button class="btn btn-ghost" onclick="copyCode()">📋 Copy Code</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ DESIGNER TAB -->
+<div class="panel" id="tab-designer">
+
+  <div class="card" style="background:var(--blue-light);border-color:#a8cef0;">
+    <div class="card-body" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="font-size:28px">🎨</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:4px">Designer Review Layer</div>
+        <div style="font-size:13px;color:var(--muted)">Import the trainer's share code below, then review each piece and add your professional assessment — modality classification, debt status, rebuild decision, hour estimate, and phase assignment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPORT -->
+  <div class="card">
+    <div class="card-header"><h2>📥 Import Trainer Data</h2></div>
+    <div class="card-body">
+      <div class="share-box">
+        <h3>Import Share Code</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Paste the trainer's share code here and click Import. Their inventory will load and you can add your design layer on top.</p>
+        <textarea class="share-code-area" id="importCode" placeholder="Paste the trainer's share code here..."></textarea>
+        <div class="share-row">
+          <button class="btn btn-blue" onclick="importCode()">📥 Import Trainer Data</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importCode').value=''">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESIGNER REVIEW LIST -->
+  <div class="card">
+    <div class="card-header">
+      <h2>🎨 Designer Review <span id="d-count" style="opacity:.6;font-weight:400;font-size:12px;margin-left:6px"></span></h2>
+      <div class="hdr-right">
+        <button class="btn btn-green btn-sm" onclick="showTab('joint')">→ View Program Inventory</button>
+      </div>
+    </div>
+    <div class="card-body" id="designerList">
+      <div class="empty-state"><div class="ei">📥</div><p>Import the trainer's share code above to begin your review.</p></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ JOINT TAB -->
+<div class="panel" id="tab-joint">
+
+  <div class="card print-card">
+    <div class="card-header">
+      <h2>🤝 Program Inventory — <span id="j-programName" style="opacity:.7;font-weight:400">Untitled Program</span></h2>
+      <div class="hdr-right">
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Print</button>
+        <button class="btn btn-navy btn-sm" onclick="sendToPlanner()">→ Send to Program Planner</button>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- STATS -->
+      <div class="stats-grid" id="j-stats"></div>
+
+      <!-- DEPENDENCY ALERT -->
+      <div id="j-depAlert" style="display:none;margin-bottom:16px"></div>
+
+      <!-- TABLE -->
+      <div class="table-scroll">
+        <table class="joint-table" id="j-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Content Name</th>
+              <th>Type</th>
+              <th>Duration</th>
+              <th>Condition</th>
+              <th>Needs Update?</th>
+              <th>Dependencies</th>
+              <th>Modality</th>
+              <th>Debt Status</th>
+              <th>Decision</th>
+              <th>Est. Hours</th>
+              <th>Phase</th>
+              <th>Priority</th>
+            </tr>
+          </thead>
+          <tbody id="j-tbody"></tbody>
+        </table>
+      </div>
+      <div id="j-empty" class="empty-state" style="display:none"><div class="ei">🤝</div><p>Complete the Trainer View and Designer Review first, then this view will populate automatically.</p></div>
+
+      <!-- TOTALS -->
+      <div id="j-totals" style="display:none;margin-top:20px;background:var(--navy);border-radius:var(--radius);padding:16px 20px;display:flex;gap:24px;flex-wrap:wrap">
+        <div style="color:rgba(255,255,255,.6);font-size:12px;font-weight:600;text-transform:uppercase;align-self:center">Totals</div>
+        <div><div style="color:var(--green);font-size:20px;font-weight:900" id="j-totalHrs">0</div><div style="color:rgba(255,255,255,.5);font-size:11px">Est. Design Hours</div></div>
+        <div><div style="color:white;font-size:20px;font-weight:900" id="j-totalMins">0</div><div style="color:rgba(255,255,255,.5);font-size:11px">Total Learner Minutes</div></div>
+        <div><div style="color:var(--orange);font-size:20px;font-weight:900" id="j-rebuilds">0</div><div style="color:rgba(255,255,255,.5);font-size:11px">Full Rebuilds</div></div>
+        <div><div style="color:var(--blue);font-size:20px;font-weight:900" id="j-updates">0</div><div style="color:rgba(255,255,255,.5);font-size:11px">Updates</div></div>
+        <div><div style="color:var(--red);font-size:20px;font-weight:900" id="j-depCount">0</div><div style="color:rgba(255,255,255,.5);font-size:11px">With Dependencies</div></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────────────────────────
+const STORE = 'idt_inventory_v1';
+let state = loadState();
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORE)) || defaultState(); } catch { return defaultState(); }
+}
+function defaultState() {
+  return { meta: { programName:'', completedBy:'', programLength:'', audience:'' }, deliverables: [] };
+}
+function saveState() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch(e) { console.warn(e); } }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function escHTML(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ─── TABS ──────────────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('tab-btn-' + name).classList.add('active');
+  if (name === 'joint') renderJoint();
+  if (name === 'designer') renderDesignerList();
+  if (name === 'trainer') renderTrainerList();
+}
+
+// ─── SYNC META ─────────────────────────────────────────────────────────────
+function syncMeta() {
+  state.meta.programName   = document.getElementById('t-programName').value;
+  state.meta.completedBy   = document.getElementById('t-completedBy').value;
+  state.meta.programLength = document.getElementById('t-programLength').value;
+  state.meta.audience      = document.getElementById('t-audience').value;
+  saveState();
+}
+
+function loadMetaIntoForm() {
+  document.getElementById('t-programName').value   = state.meta.programName || '';
+  document.getElementById('t-completedBy').value   = state.meta.completedBy || '';
+  document.getElementById('t-programLength').value = state.meta.programLength || '';
+  document.getElementById('t-audience').value      = state.meta.audience || '';
+}
+
+// ─── ADD DELIVERABLE ───────────────────────────────────────────────────────
+function addDeliverable() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) { alert('Please enter a content name.'); return; }
+
+  const cond = document.querySelector('input[name="new-cond"]:checked')?.value || '';
+
+  const item = {
+    id: uid(),
+    // Trainer fields
+    name,
+    type: document.getElementById('new-type').value,
+    duration: parseInt(document.getElementById('new-duration').value) || 0,
+    desc: document.getElementById('new-desc').value.trim(),
+    location: document.getElementById('new-location').value.trim(),
+    condition: cond,
+    needsUpdate: document.getElementById('new-needsUpdate').value,
+    hasDep: document.getElementById('new-hasDep').value,
+    depNotes: document.getElementById('new-depNotes').value.trim(),
+    trainerNotes: document.getElementById('new-trainerNotes').value.trim(),
+    // Designer fields (empty until review)
+    modality: '',
+    debtStatus: '',
+    rebuildDecision: '',
+    estHours: '',
+    phase: '',
+    priority: '',
+    designerNotes: '',
+  };
+
+  state.deliverables.push(item);
+  saveState();
+
+  // Reset form
+  ['new-name','new-duration','new-desc','new-location','new-depNotes','new-trainerNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('new-type').value = '';
+  document.getElementById('new-needsUpdate').value = '';
+  document.getElementById('new-hasDep').value = 'none';
+  document.querySelectorAll('input[name="new-cond"]').forEach(r => r.checked = false);
+
+  renderTrainerList();
+}
+
+// ─── CONDITION HELPERS ─────────────────────────────────────────────────────
+const COND_BADGE = {
+  current:  '<span class="badge badge-green">✓ Current</span>',
+  minor:    '<span class="badge badge-blue">~ Minor Updates</span>',
+  outdated: '<span class="badge badge-orange">⚠ Outdated</span>',
+  broken:   '<span class="badge badge-red">✕ Broken</span>',
+};
+const DEP_BADGE = {
+  none:     '',
+  outbound: '<span class="badge badge-orange">→ Others depend on this</span>',
+  inbound:  '<span class="badge badge-orange">← Depends on others</span>',
+  both:     '<span class="badge badge-red">⇄ Hub piece</span>',
+};
+const UPDATE_BADGE = {
+  'yes-urgent':    '<span class="badge badge-red">Urgent</span>',
+  'yes-soon':      '<span class="badge badge-orange">Before next delivery</span>',
+  'yes-eventually':'<span class="badge badge-blue">Eventually</span>',
+  'no':            '<span class="badge badge-green">No update needed</span>',
+};
+const REBUILD_BADGE = {
+  rebuild:   '<span class="badge badge-orange">Full Rebuild</span>',
+  update:    '<span class="badge badge-blue">Update</span>',
+  retire:    '<span class="badge badge-red">Retire</span>',
+  keepasis:  '<span class="badge badge-green">Keep As-Is</span>',
+};
+const DEBT_BADGE = {
+  low:      '<span class="badge badge-green">🟢 Low</span>',
+  moderate: '<span class="badge badge-blue">🔵 Moderate</span>',
+  high:     '<span class="badge badge-orange">🟠 High</span>',
+  critical: '<span class="badge badge-red">🔴 Critical</span>',
+};
+
+// ─── TRAINER LIST ──────────────────────────────────────────────────────────
+function renderTrainerList() {
+  const el = document.getElementById('trainerList');
+  const count = document.getElementById('t-count');
+  count.textContent = state.deliverables.length ? `(${state.deliverables.length})` : '';
+
+  if (!state.deliverables.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei">📦</div><p>No content added yet.</p></div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="deliverable-list">${state.deliverables.map((item, i) => {
+    const hasDepClass = item.hasDep === 'both' ? 'dep-critical' : item.hasDep !== 'none' ? 'has-dep' : '';
+    return `
+      <div class="del-card ${hasDepClass}" id="dc_${item.id}">
+        <div class="del-card-header" onclick="toggleCard('${item.id}')">
+          <div class="del-num">${i+1}</div>
+          <div class="del-title-display">${escHTML(item.name)}</div>
+          <div class="del-badges">
+            ${item.condition ? COND_BADGE[item.condition] || '' : ''}
+            ${item.hasDep !== 'none' ? DEP_BADGE[item.hasDep] || '' : ''}
+            ${item.duration ? `<span class="badge badge-muted">${item.duration}m</span>` : ''}
+          </div>
+          <span style="color:var(--muted);font-size:18px;margin-left:4px">▾</span>
+        </div>
+        <div class="del-card-body" id="dcb_${item.id}">
+          <div class="del-grid">
+            <div><label>Type</label><div style="font-size:13px">${escHTML(item.type)||'—'}</div></div>
+            <div><label>Duration</label><div style="font-size:13px">${item.duration ? item.duration + ' minutes' : '—'}</div></div>
+            <div><label>Needs Update?</label><div>${UPDATE_BADGE[item.needsUpdate]||'—'}</div></div>
+          </div>
+          <div class="del-grid-2">
+            <div><label>What It Covers</label><div style="font-size:12px;color:var(--muted)">${escHTML(item.desc)||'—'}</div></div>
+            <div><label>Where It Lives</label><div style="font-size:12px;color:var(--muted)">${escHTML(item.location)||'—'}</div></div>
+          </div>
+          ${item.hasDep !== 'none' ? `
+            <div class="dep-flag ${item.hasDep === 'both' ? 'critical' : ''}">
+              <div class="dep-flag-icon">${item.hasDep === 'both' ? '🔴' : '⚠️'}</div>
+              <div><strong>${item.hasDep === 'both' ? 'Hub piece — changes here affect AND depend on other content' : item.hasDep === 'outbound' ? 'Other content depends on this piece' : 'This piece depends on other content'}</strong>${item.depNotes ? `<br>${escHTML(item.depNotes)}` : ''}</div>
+            </div>` : ''}
+          ${item.trainerNotes ? `<div style="background:var(--orange-light);border-radius:var(--radius);padding:8px 12px;margin-top:8px;font-size:12px;color:#7a3e00"><strong>Trainer Note:</strong> ${escHTML(item.trainerNotes)}</div>` : ''}
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-ghost btn-sm" onclick="editItem('${item.id}')">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteItem('${item.id}')">Remove</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('')}</div>`;
+}
+
+function toggleCard(id) {
+  const body = document.getElementById('dcb_' + id);
+  if (body) body.classList.toggle('open');
+}
+
+function deleteItem(id) {
+  if (!confirm('Remove this content piece?')) return;
+  state.deliverables = state.deliverables.filter(d => d.id !== id);
+  saveState();
+  renderTrainerList();
+}
+
+function editItem(id) {
+  const item = state.deliverables.find(d => d.id === id);
+  if (!item) return;
+  // Simple inline edit — repopulate add form
+  document.getElementById('new-name').value = item.name;
+  document.getElementById('new-type').value = item.type;
+  document.getElementById('new-duration').value = item.duration || '';
+  document.getElementById('new-desc').value = item.desc;
+  document.getElementById('new-location').value = item.location;
+  document.getElementById('new-needsUpdate').value = item.needsUpdate;
+  document.getElementById('new-hasDep').value = item.hasDep;
+  document.getElementById('new-depNotes').value = item.depNotes;
+  document.getElementById('new-trainerNotes').value = item.trainerNotes;
+  if (item.condition) { const r = document.querySelector(`input[name="new-cond"][value="${item.condition}"]`); if(r) r.checked = true; }
+  deleteItem(id);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function clearAll() {
+  if (!confirm('Clear all content pieces and start over?')) return;
+  state.deliverables = [];
+  saveState();
+  renderTrainerList();
+}
+
+// ─── DESIGNER LIST ─────────────────────────────────────────────────────────
+function renderDesignerList() {
+  const el = document.getElementById('designerList');
+  const count = document.getElementById('d-count');
+  count.textContent = state.deliverables.length ? `(${state.deliverables.length})` : '';
+
+  if (!state.deliverables.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei">📥</div><p>Import the trainer's share code above to begin your review.</p></div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="deliverable-list">${state.deliverables.map((item, i) => `
+    <div class="del-card ${item.hasDep !== 'none' ? (item.hasDep === 'both' ? 'dep-critical' : 'has-dep') : ''}">
+      <div class="del-card-header" onclick="toggleDCard('d${item.id}')">
+        <div class="del-num">${i+1}</div>
+        <div class="del-title-display">${escHTML(item.name)}</div>
+        <div class="del-badges">
+          ${COND_BADGE[item.condition]||''}
+          ${item.hasDep !== 'none' ? DEP_BADGE[item.hasDep]||'' : ''}
+          ${item.rebuildDecision ? REBUILD_BADGE[item.rebuildDecision]||'' : ''}
+          ${item.debtStatus ? DEBT_BADGE[item.debtStatus]||'' : ''}
+          ${item.estHours ? `<span class="badge badge-navy">${item.estHours}h est.</span>` : ''}
+        </div>
+        <span style="color:var(--muted);font-size:18px;margin-left:4px">▾</span>
+      </div>
+      <div class="del-card-body" id="dcb_d${item.id}">
+        <!-- TRAINER READ-ONLY -->
+        <div style="background:var(--navy-xlight);border-radius:var(--radius);padding:12px;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📋 Trainer Input</div>
+          <div class="del-grid">
+            <div><label>Type</label><div style="font-size:12px">${escHTML(item.type)||'—'}</div></div>
+            <div><label>Duration</label><div style="font-size:12px">${item.duration ? item.duration+'m' : '—'}</div></div>
+            <div><label>Condition</label><div>${COND_BADGE[item.condition]||'—'}</div></div>
+          </div>
+          ${item.desc ? `<div style="font-size:12px;color:var(--muted);margin-top:4px"><strong>Covers:</strong> ${escHTML(item.desc)}</div>` : ''}
+          ${item.location ? `<div style="font-size:12px;color:var(--muted);margin-top:2px"><strong>Location:</strong> ${escHTML(item.location)}</div>` : ''}
+          ${item.hasDep !== 'none' ? `<div class="dep-flag ${item.hasDep==='both'?'critical':''}" style="margin-top:8px"><div class="dep-flag-icon">${item.hasDep==='both'?'🔴':'⚠️'}</div><div>${DEP_BADGE[item.hasDep]||''}${item.depNotes ? ' — '+escHTML(item.depNotes) : ''}</div></div>` : ''}
+          ${item.trainerNotes ? `<div style="font-size:12px;color:#7a3e00;margin-top:6px;font-style:italic">Note: ${escHTML(item.trainerNotes)}</div>` : ''}
+        </div>
+        <!-- DESIGNER LAYER -->
+        <div class="designer-layer">
+          <div class="designer-layer-label">🎨 Designer Review</div>
+          <div class="del-grid">
+            <div class="field">
+              <label>Modality Classification</label>
+              <select onchange="updateDesignerField('${item.id}','modality',this.value)">
+                <option value="">— Select —</option>
+                <option ${item.modality==='rise'?'selected':''} value="rise">Rise eLearning</option>
+                <option ${item.modality==='storyline'?'selected':''} value="storyline">Storyline eLearning</option>
+                <option ${item.modality==='ilt'?'selected':''} value="ilt">ILT / Facilitated</option>
+                <option ${item.modality==='video'?'selected':''} value="video">Video</option>
+                <option ${item.modality==='jobaid'?'selected':''} value="jobaid">Job Aid / QRG</option>
+                <option ${item.modality==='facguide'?'selected':''} value="facguide">Facilitator Guide</option>
+                <option ${item.modality==='workbook'?'selected':''} value="workbook">Participant Workbook</option>
+                <option ${item.modality==='assessment'?'selected':''} value="assessment">Assessment / Quiz</option>
+                <option ${item.modality==='sop'?'selected':''} value="sop">SOP / Process Doc</option>
+                <option ${item.modality==='ojt'?'selected':''} value="ojt">OJT Component</option>
+                <option ${item.modality==='other'?'selected':''} value="other">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Content Debt Status</label>
+              <select onchange="updateDesignerField('${item.id}','debtStatus',this.value)">
+                <option value="">— Select —</option>
+                <option ${item.debtStatus==='low'?'selected':''} value="low">🟢 Low — current & complete</option>
+                <option ${item.debtStatus==='moderate'?'selected':''} value="moderate">🔵 Moderate — gaps exist</option>
+                <option ${item.debtStatus==='high'?'selected':''} value="high">🟠 High — majority outdated</option>
+                <option ${item.debtStatus==='critical'?'selected':''} value="critical">🔴 Critical — effectively unusable</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Rebuild Decision</label>
+              <div class="rebuild-sel">
+                ${['keepasis','update','rebuild','retire'].map(v => `
+                  <label class="rb-opt"><input type="radio" name="rb_${item.id}" value="${v}" ${item.rebuildDecision===v?'checked':''} onchange="updateDesignerField('${item.id}','rebuildDecision','${v}')" />
+                  <div class="rb-box">${{keepasis:'Keep As-Is',update:'Update',rebuild:'Rebuild',retire:'Retire'}[v]}</div></label>`).join('')}
+              </div>
+            </div>
+          </div>
+          <div class="del-grid">
+            <div class="field">
+              <label>Est. Design Hours</label>
+              <input type="number" min="0" step=".5" value="${item.estHours||''}" placeholder="0" onchange="updateDesignerField('${item.id}','estHours',this.value)" />
+            </div>
+            <div class="field">
+              <label>Phase Assignment</label>
+              <select onchange="updateDesignerField('${item.id}','phase',this.value)">
+                <option value="">— Assign phase —</option>
+                <option ${item.phase==='1'?'selected':''} value="1">Phase 1</option>
+                <option ${item.phase==='2'?'selected':''} value="2">Phase 2</option>
+                <option ${item.phase==='3'?'selected':''} value="3">Phase 3</option>
+                <option ${item.phase==='4'?'selected':''} value="4">Phase 4</option>
+                <option ${item.phase==='tbd'?'selected':''} value="tbd">TBD</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Priority Within Phase</label>
+              <select onchange="updateDesignerField('${item.id}','priority',this.value)">
+                <option value="">— Set priority —</option>
+                <option ${item.priority==='p1'?'selected':''} value="p1">P1 — Must complete before pilot</option>
+                <option ${item.priority==='p2'?'selected':''} value="p2">P2 — Strongly preferred before pilot</option>
+                <option ${item.priority==='p3'?'selected':''} value="p3">P3 — Can defer to next phase</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Designer Notes</label>
+            <textarea rows="2" placeholder="Dependencies, risks, assumptions, sequencing notes..." onchange="updateDesignerField('${item.id}','designerNotes',this.value)">${escHTML(item.designerNotes||'')}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function toggleDCard(id) {
+  const body = document.getElementById('dcb_' + id);
+  if (body) body.classList.toggle('open');
+}
+
+function updateDesignerField(id, field, value) {
+  const item = state.deliverables.find(d => d.id === id);
+  if (!item) return;
+  item[field] = field === 'estHours' ? (parseFloat(value)||0) : value;
+  saveState();
+}
+
+// ─── JOINT VIEW ────────────────────────────────────────────────────────────
+function renderJoint() {
+  document.getElementById('j-programName').textContent = state.meta.programName || 'Untitled Program';
+  const items = state.deliverables;
+
+  if (!items.length) {
+    document.getElementById('j-table').style.display = 'none';
+    document.getElementById('j-empty').style.display = 'block';
+    document.getElementById('j-totals').style.display = 'none';
+    document.getElementById('j-stats').innerHTML = '';
+    return;
+  }
+
+  document.getElementById('j-table').style.display = '';
+  document.getElementById('j-empty').style.display = 'none';
+
+  // STATS
+  const totalMins = items.reduce((s,i) => s+(i.duration||0), 0);
+  const totalHrs = items.reduce((s,i) => s+(parseFloat(i.estHours)||0), 0);
+  const rebuilds = items.filter(i => i.rebuildDecision === 'rebuild').length;
+  const updates = items.filter(i => i.rebuildDecision === 'update').length;
+  const withDeps = items.filter(i => i.hasDep !== 'none').length;
+  const critical = items.filter(i => i.debtStatus === 'critical').length;
+
+  document.getElementById('j-stats').innerHTML = `
+    <div class="stat-item highlight"><div class="sv">${items.length}</div><div class="sl">Total Pieces</div></div>
+    <div class="stat-item"><div class="sv">${Math.round(totalMins/60*10)/10}h</div><div class="sl">Learner Time</div></div>
+    <div class="stat-item"><div class="sv" style="color:var(--orange)">${rebuilds}</div><div class="sl">Full Rebuilds</div></div>
+    <div class="stat-item"><div class="sv" style="color:var(--blue)">${updates}</div><div class="sl">Updates</div></div>
+    <div class="stat-item"><div class="sv" style="color:var(--red)">${withDeps}</div><div class="sl">With Dependencies</div></div>
+    <div class="stat-item"><div class="sv" style="color:var(--green)">${totalHrs}h</div><div class="sl">Design Hours Est.</div></div>
+  `;
+
+  // DEPENDENCY ALERT
+  const depAlert = document.getElementById('j-depAlert');
+  const hubPieces = items.filter(i => i.hasDep === 'both');
+  const depPieces = items.filter(i => i.hasDep !== 'none');
+  if (depPieces.length) {
+    depAlert.style.display = 'block';
+    depAlert.innerHTML = `
+      <div style="background:${hubPieces.length ? 'var(--red-light)' : 'var(--orange-light)'};border:1px solid ${hubPieces.length ? '#f5a0a0' : '#ffd199'};border-radius:var(--radius);padding:12px 16px;font-size:13px;color:${hubPieces.length ? 'var(--red)' : '#7a3e00'}">
+        <strong>${hubPieces.length ? '🔴' : '⚠️'} ${depPieces.length} piece${depPieces.length>1?'s have':' has'} dependencies — changing one affects others.</strong>
+        ${hubPieces.length ? `<br>${hubPieces.map(i=>`<em>${escHTML(i.name)}</em>`).join(', ')} ${hubPieces.length>1?'are hub pieces':'is a hub piece'} — updating ${hubPieces.length>1?'these affect':'this affects'} content in both directions.` : ''}
+        <br><span style="font-size:12px;opacity:.8">These pieces must be sequenced carefully in the Architecture phase plan.</span>
+      </div>`;
+  } else {
+    depAlert.style.display = 'none';
+  }
+
+  // TABLE
+  const COND_TEXT = { current:'✓ Current', minor:'~ Minor', outdated:'⚠ Outdated', broken:'✕ Broken' };
+  const DEP_TEXT = { none:'—', outbound:'→ Outbound', inbound:'← Inbound', both:'⇄ Hub' };
+  const REBUILD_TEXT = { rebuild:'🟠 Rebuild', update:'🔵 Update', retire:'🔴 Retire', keepasis:'🟢 Keep As-Is' };
+  const DEBT_TEXT = { low:'🟢 Low', moderate:'🔵 Moderate', high:'🟠 High', critical:'🔴 Critical' };
+  const UPDATE_SHORT = { 'yes-urgent':'🔴 Urgent', 'yes-soon':'🟠 Soon', 'yes-eventually':'🔵 Eventually', 'no':'🟢 No' };
+
+  document.getElementById('j-tbody').innerHTML = items.map((item, i) => {
+    const depClass = item.hasDep === 'both' ? 'dep-critical-row' : item.hasDep !== 'none' ? 'dep-row' : '';
+    return `<tr class="${depClass}">
+      <td style="font-weight:700;color:var(--muted)">${i+1}</td>
+      <td><div class="joint-name">${escHTML(item.name)}</div><div class="joint-desc">${escHTML(item.desc)}</div></td>
+      <td style="font-size:11px">${escHTML(item.type)||'—'}</td>
+      <td style="text-align:center;font-weight:600">${item.duration ? item.duration+'m' : '—'}</td>
+      <td>${COND_TEXT[item.condition]||'—'}</td>
+      <td>${UPDATE_SHORT[item.needsUpdate]||'—'}</td>
+      <td style="font-size:11px;font-weight:600;color:${item.hasDep==='both'?'var(--red)':item.hasDep!=='none'?'var(--orange)':'var(--muted)'}">${DEP_TEXT[item.hasDep]||'—'}</td>
+      <td style="font-size:11px">${escHTML(item.modality)||'—'}</td>
+      <td>${DEBT_TEXT[item.debtStatus]||'—'}</td>
+      <td style="font-weight:700">${REBUILD_TEXT[item.rebuildDecision]||'—'}</td>
+      <td style="text-align:center;font-weight:700;color:var(--navy)">${item.estHours ? item.estHours+'h' : '—'}</td>
+      <td style="text-align:center">${item.phase ? `<span class="phase-pill">Ph ${item.phase}</span>` : '—'}</td>
+      <td style="font-size:11px;font-weight:600;color:${item.priority==='p1'?'var(--red)':item.priority==='p2'?'var(--orange)':'var(--muted)'}">${item.priority ? item.priority.toUpperCase() : '—'}</td>
+    </tr>`;
+  }).join('');
+
+  // TOTALS
+  const totals = document.getElementById('j-totals');
+  totals.style.display = 'flex';
+  document.getElementById('j-totalHrs').textContent = totalHrs + 'h';
+  document.getElementById('j-totalMins').textContent = totalMins + 'm';
+  document.getElementById('j-rebuilds').textContent = rebuilds;
+  document.getElementById('j-updates').textContent = updates;
+  document.getElementById('j-depCount').textContent = withDeps;
+}
+
+// ─── SHARE CODE ────────────────────────────────────────────────────────────
+function exportCode() {
+  const payload = JSON.stringify(state);
+  const encoded = btoa(unescape(encodeURIComponent(payload)));
+  document.getElementById('exportCode').value = encoded;
+}
+
+function copyCode() {
+  const code = document.getElementById('exportCode').value;
+  if (!code) { exportCode(); }
+  navigator.clipboard.writeText(document.getElementById('exportCode').value)
+    .then(() => alert('Share code copied to clipboard!'));
+}
+
+function importCode() {
+  const code = document.getElementById('importCode').value.trim();
+  if (!code) { alert('Please paste a share code first.'); return; }
+  try {
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(code))));
+    // Merge — preserve designer fields if already reviewed
+    if (decoded.meta) state.meta = decoded.meta;
+    if (decoded.deliverables) {
+      decoded.deliverables.forEach(incoming => {
+        const existing = state.deliverables.find(d => d.id === incoming.id);
+        if (existing) {
+          // Preserve designer fields, update trainer fields
+          Object.assign(existing, incoming, {
+            modality: existing.modality,
+            debtStatus: existing.debtStatus,
+            rebuildDecision: existing.rebuildDecision,
+            estHours: existing.estHours,
+            phase: existing.phase,
+            priority: existing.priority,
+            designerNotes: existing.designerNotes,
+          });
+        } else {
+          state.deliverables.push(incoming);
+        }
+      });
+    }
+    saveState();
+    loadMetaIntoForm();
+    renderDesignerList();
+    document.getElementById('importCode').value = '';
+    alert(`Imported ${decoded.deliverables?.length || 0} content pieces from ${decoded.meta?.completedBy || 'the trainer'}.`);
+  } catch(e) {
+    alert('Invalid share code. Please make sure you copied the full code from the trainer.');
+  }
+}
+
+// ─── SEND TO PLANNER ───────────────────────────────────────────────────────
+function sendToPlanner() {
+  const totalHrs = state.deliverables.reduce((s,i) => s+(parseFloat(i.estHours)||0), 0);
+  try { localStorage.setItem('idt_inventory_handoff', JSON.stringify({ programName: state.meta.programName, totalHrs, deliverables: state.deliverables.length })); } catch(e) {}
+  const params = new URLSearchParams({ program: state.meta.programName, inventoryHrs: totalHrs, pieces: state.deliverables.length });
+  window.location.href = `program-planner.html?${params.toString()}`;
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+loadMetaIntoForm();
+renderTrainerList();
+</script>
+</body>
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Debt Audit | ID Toolkit</title>
+<style>
+  :root {
+    --navy: #263746; --green: #77BC1F; --blue: #2172B7; --orange: #FF8300; --red: #d63b3b;
+    --navy-xlight: #eef1f4; --green-light: #f0f8e6; --orange-light: #fff4e6; --red-light: #fdf0f0;
+    --text: #1a2730; --muted: #6b7f8c; --border: #d0dbe3; --white: #ffffff;
+    --radius: 8px; --radius-lg: 12px;
+    --low: #77BC1F; --moderate: #2172B7; --high: #FF8300; --critical: #d63b3b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Roboto','Segoe UI',sans-serif; background: var(--navy-xlight); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--navy); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 36px; height: 36px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: white; }
+  .header-title { color: white; font-size: 15px; font-weight: 500; opacity: .85; }
+  .header-title span { color: var(--green); font-weight: 700; opacity: 1; }
+  .back-link { color: var(--border); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+  .back-link:hover { color: white; }
+
+  .page-hero { background: var(--navy); padding: 28px 32px 36px; border-bottom: 4px solid var(--green); }
+  .page-hero h1 { color: white; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .page-hero p { color: rgba(255,255,255,.6); font-size: 14px; max-width: 600px; }
+
+  .main { max-width: 980px; margin: 0 auto; padding: 28px 24px 64px; }
+
+  .card { background: var(--white); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+  .card-header { background: var(--navy); padding: 13px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .card-header h2 { color: white; font-size: 14px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  label { display: block; font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 5px; letter-spacing: .5px; text-transform: uppercase; }
+  input[type="text"], select { width: 100%; padding: 9px 11px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; color: var(--text); background: var(--white); transition: border-color .2s; }
+  input:focus, select:focus { outline: none; border-color: var(--blue); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .btn { padding: 9px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: #68a619; }
+  .btn-navy { background: var(--navy); color: white; }
+  .btn-navy:hover { background: #344d5e; }
+  .btn-blue { background: var(--blue); color: white; }
+  .btn-blue:hover { background: #1860a0; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-xlight); }
+  .btn-orange { background: var(--orange); color: white; }
+  .btn-orange:hover { background: #e07500; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-danger { background: var(--red-light); color: var(--red); border: 1px solid #f5a0a0; }
+  .btn-danger:hover { background: var(--red); color: white; }
+
+  /* SCORE KEY */
+  .score-key { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .sk-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text); }
+  .sk-dot { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; flex-shrink: 0; }
+
+  /* AUDIT CATEGORIES */
+  .audit-category { border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; transition: border-color .2s; }
+  .audit-category:has(.score-sel[value="3"]) { border-color: var(--green); }
+  .audit-category-header { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; padding: 12px 14px; background: var(--navy-xlight); }
+  .cat-name { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .cat-weight { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .cat-weight strong { color: var(--navy); }
+  .audit-category-body { padding: 10px 14px; background: white; }
+  .cat-description { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+
+  /* SCORE SELECTOR */
+  .score-selector { display: flex; gap: 6px; align-items: center; }
+  .score-opt { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+  .score-opt input { display: none; }
+  .score-opt .score-box {
+    width: 44px; height: 36px; border-radius: 6px; border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; transition: all .15s; color: var(--muted);
+    background: var(--white); cursor: pointer;
+  }
+  .score-opt .score-lbl { font-size: 9px; color: var(--muted); text-align: center; max-width: 44px; line-height: 1.2; }
+  .score-opt input:checked + .score-box { border-color: transparent; color: white; }
+  .score-opt:nth-child(1) input:checked + .score-box { background: var(--red); border-color: var(--red); }
+  .score-opt:nth-child(2) input:checked + .score-box { background: var(--orange); border-color: var(--orange); }
+  .score-opt:nth-child(3) input:checked + .score-box { background: var(--blue); border-color: var(--blue); }
+  .score-opt:nth-child(4) input:checked + .score-box { background: var(--green); border-color: var(--green); }
+  .score-opt .score-box:hover { border-color: var(--navy); color: var(--navy); }
+  .weighted-pts { font-size: 12px; color: var(--muted); margin-left: 8px; white-space: nowrap; }
+  .weighted-pts strong { color: var(--navy); font-size: 14px; }
+
+  .notes-input { width: 100%; margin-top: 8px; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 12px; font-family: inherit; color: var(--text); resize: vertical; min-height: 36px; }
+  .notes-input:focus { outline: none; border-color: var(--blue); }
+
+  /* LIVE SCORE BAR */
+  .score-bar-section { position: sticky; top: 0; z-index: 10; background: var(--navy); padding: 12px 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+  .score-display { display: flex; align-items: baseline; gap: 6px; }
+  .score-number { font-size: 28px; font-weight: 900; color: var(--green); line-height: 1; }
+  .score-max { font-size: 14px; color: rgba(255,255,255,.5); }
+  .score-bar-wrap { flex: 1; min-width: 160px; }
+  .score-bar-track { height: 10px; background: rgba(255,255,255,.15); border-radius: 5px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 5px; transition: width .3s, background .3s; }
+  .tier-badge { font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 20px; letter-spacing: .3px; white-space: nowrap; }
+  .tier-low      { background: rgba(119,188,31,.2);  color: var(--low); }
+  .tier-moderate { background: rgba(33,114,183,.2);  color: #60aaee; }
+  .tier-high     { background: rgba(255,131,0,.2);   color: var(--orange); }
+  .tier-critical { background: rgba(214,59,59,.2);   color: #f07070; }
+  .score-pct { font-size: 12px; color: rgba(255,255,255,.5); }
+
+  /* TIER REFERENCE */
+  .tier-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+  .tier-card { border-radius: var(--radius); padding: 12px; border: 2px solid transparent; }
+  .tier-card.low      { background: #f0f8e6; border-color: var(--low); }
+  .tier-card.moderate { background: #eef5fd; border-color: var(--blue); }
+  .tier-card.high     { background: var(--orange-light); border-color: var(--orange); }
+  .tier-card.critical { background: var(--red-light); border-color: var(--red); }
+  .tier-card .tc-label { font-size: 12px; font-weight: 800; margin-bottom: 2px; }
+  .tier-card.low      .tc-label { color: var(--low); }
+  .tier-card.moderate .tc-label { color: var(--blue); }
+  .tier-card.high     .tc-label { color: var(--orange); }
+  .tier-card.critical .tc-label { color: var(--red); }
+  .tier-card .tc-range { font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .tier-card .tc-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .tier-card .tc-hrs { font-size: 11px; font-weight: 700; margin-top: 6px; }
+  .tier-card.low      .tc-hrs { color: var(--low); }
+  .tier-card.moderate .tc-hrs { color: var(--blue); }
+  .tier-card.high     .tc-hrs { color: var(--orange); }
+  .tier-card.critical .tc-hrs { color: var(--red); }
+
+  /* ACTIONS ROW */
+  .actions-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+  /* ARCHIVE */
+  .archive-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 8px; }
+  .archive-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .archive-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .archive-actions { display: flex; gap: 6px; align-items: center; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .ei { font-size: 36px; margin-bottom: 10px; }
+
+  /* PRINT SUMMARY */
+  .summary-card { display: none; }
+  @media print {
+    header, .page-hero, .card:not(.summary-card), .actions-row, .score-bar-section { display: none !important; }
+    .summary-card { display: block !important; background: white; padding: 32px; }
+    body { background: white; }
+    .main { padding: 0; max-width: 100%; }
+  }
+  .summary-card { background: white; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 28px; margin-top: 20px; }
+  .sc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--navy); }
+  .sc-title { font-size: 20px; font-weight: 800; color: var(--navy); }
+  .sc-subtitle { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .sc-tier { font-size: 14px; font-weight: 800; padding: 8px 16px; border-radius: 8px; }
+  .sc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .sc-item { padding: 12px; background: var(--navy-xlight); border-radius: var(--radius); }
+  .sc-item .si-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+  .sc-item .si-val { font-size: 16px; font-weight: 800; color: var(--navy); margin-top: 2px; }
+  .sc-categories { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
+  .sc-categories th { background: var(--navy); color: white; padding: 8px 10px; text-align: left; font-weight: 600; }
+  .sc-categories td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .sc-categories tr:nth-child(even) td { background: var(--navy-xlight); }
+  .sc-footer { font-size: 11px; color: var(--muted); text-align: center; border-top: 1px solid var(--border); padding-top: 12px; }
+
+  @media (max-width: 640px) {
+    .tier-grid { grid-template-columns: 1fr 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .score-selector { flex-wrap: wrap; }
+    header, .page-hero { padding-left: 16px; padding-right: 16px; }
+    .main { padding: 20px 16px 48px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="header-logo">ID</div>
+    <div class="header-title"><span>ID Toolkit</span></div>
+  </div>
+  <a href="index.html" class="back-link">← All Tools</a>
+</header>
+
+<div class="page-hero">
+  <h1>🔍 Content Debt Audit</h1>
+  <p>Run this audit before complexity scoring any program-level project. Score each area 0–3. Results feed directly into the Program Planner.</p>
+</div>
+
+<div class="main">
+
+  <!-- SETUP -->
+  <div class="card">
+    <div class="card-header"><h2>📋 Audit Setup</h2></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="field">
+          <label>Program Name</label>
+          <input type="text" id="programName" placeholder="e.g., Meters | Entry-Level" />
+        </div>
+        <div class="field">
+          <label>Audited By</label>
+          <input type="text" id="auditedBy" placeholder="e.g., Averi Riggott" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE SCORE CARD -->
+  <div class="card" id="scoreCard">
+    <div class="score-bar-section">
+      <div class="score-display">
+        <span class="score-number" id="liveScore">0</span>
+        <span class="score-max">/ 90</span>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-track"><div class="score-bar-fill" id="scoreBarFill" style="width:0%"></div></div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px" id="scorePct">0% of max score</div>
+      </div>
+      <span class="tier-badge tier-critical" id="tierBadge">Score your audit below</span>
+    </div>
+    <div class="card-body">
+      <div class="score-key">
+        <span style="font-size:12px;font-weight:700;color:var(--navy);margin-right:4px">Score Key:</span>
+        <span class="sk-item"><span class="sk-dot" style="background:var(--red)">0</span> Doesn't exist / unusable</span>
+        <span class="sk-item"><span class="sk-dot" style="background:var(--orange)">1</span> Heavily outdated</span>
+        <span class="sk-item"><span class="sk-dot" style="background:var(--blue)">2</span> Moderate gaps</span>
+        <span class="sk-item"><span class="sk-dot" style="background:var(--green)">3</span> Current &amp; complete</span>
+      </div>
+      <div id="auditCategories"></div>
+    </div>
+  </div>
+
+  <!-- TIER REFERENCE -->
+  <div class="card">
+    <div class="card-header"><h2>📊 Content Debt Tier Reference</h2></div>
+    <div class="card-body">
+      <div class="tier-grid">
+        <div class="tier-card low"><div class="tc-label">🟢 LOW DEBT</div><div class="tc-range">Weighted 72–90</div><div class="tc-desc">Materials mostly current and complete. Standard update project.</div><div class="tc-hrs">Hours: Moderate</div></div>
+        <div class="tier-card moderate"><div class="tc-label">🔵 MODERATE DEBT</div><div class="tc-range">Weighted 52–71</div><div class="tc-desc">Gaps exist. Some sections need rebuild. Plan for extended revision cycles.</div><div class="tc-hrs">Hours: Significant</div></div>
+        <div class="tier-card high"><div class="tc-label">🟠 HIGH DEBT</div><div class="tc-range">Weighted 29–51</div><div class="tc-desc">Majority needs rebuild. Score as new build in complexity intake.</div><div class="tc-hrs">Hours: High</div></div>
+        <div class="tier-card critical"><div class="tc-label">🔴 CRITICAL DEBT</div><div class="tc-range">Weighted 0–28</div><div class="tc-desc">Effectively greenfield. Do not present as update to stakeholders.</div><div class="tc-hrs">Hours: Greenfield</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions-row">
+    <button class="btn btn-green" onclick="saveAudit()">💾 Save Audit</button>
+    <button class="btn btn-navy" onclick="window.print()">🖨️ Print Summary Card</button>
+    <button class="btn btn-orange" onclick="sendToPlanner()">→ Send to Program Planner</button>
+    <button class="btn btn-ghost" onclick="clearAudit()">↺ Clear</button>
+  </div>
+
+  <!-- SAVED AUDITS -->
+  <div class="card" style="margin-top:20px">
+    <div class="card-header">
+      <h2>🗄️ Saved Audits</h2>
+    </div>
+    <div class="card-body" id="savedAudits">
+      <div class="empty-state"><div class="ei">🔍</div><p>No saved audits yet.</p></div>
+    </div>
+  </div>
+
+  <!-- PRINT SUMMARY CARD (hidden until print) -->
+  <div class="summary-card" id="summaryCard">
+    <div class="sc-header">
+      <div>
+        <div class="sc-title" id="sc-programName">Program Name</div>
+        <div class="sc-subtitle">Content Debt Audit · Conservice Instructional Design Team</div>
+      </div>
+      <div class="sc-tier" id="sc-tier"></div>
+    </div>
+    <div class="sc-grid">
+      <div class="sc-item"><div class="si-label">Weighted Score</div><div class="si-val" id="sc-score"></div></div>
+      <div class="sc-item"><div class="si-label">Max Possible</div><div class="si-val">90 points</div></div>
+      <div class="sc-item"><div class="si-label">Audited By</div><div class="si-val" id="sc-auditor"></div></div>
+      <div class="sc-item"><div class="si-label">Date</div><div class="si-val" id="sc-date"></div></div>
+    </div>
+    <table class="sc-categories">
+      <thead><tr><th>Area</th><th>Weight</th><th>Score</th><th>Weighted Pts</th><th>Notes</th></tr></thead>
+      <tbody id="sc-tbody"></tbody>
+    </table>
+    <div class="sc-footer">Generated by ID Toolkit · Content Debt Audit Tool</div>
+  </div>
+
+</div>
+
+<script>
+// ─── DATA ──────────────────────────────────────────────────────────────────
+const CATEGORIES = [
+  { id:'quality',      name:'Existing Content Quality',             weight:3, desc:'Are current materials accurate, on-brand, and instructionally sound?' },
+  { id:'currency',     name:'Content Currency',                     weight:3, desc:'Is content up to date with current processes, tools, and policies?' },
+  { id:'cohesion',     name:'Cohesion & Consistency',               weight:2, desc:'Do materials look and feel like they came from one team?' },
+  { id:'facguide',     name:'Facilitator / Trainer Guides',         weight:2, desc:'Do facilitator guides exist and are they complete?' },
+  { id:'participant',  name:'Participant Materials',                 weight:2, desc:'Do learner-facing materials (guides, job aids, workbooks) exist and work?' },
+  { id:'elearning',    name:'eLearning / LMS Assets',               weight:2, desc:'Are digital assets current, accessible, and functioning in the LMS?' },
+  { id:'sme',          name:'SME / Source Material Access',         weight:2, desc:'Are SMEs identified and is source content available and approved?' },
+  { id:'architecture', name:'Program Architecture',                 weight:2, desc:'Is there a clear curriculum map, sequence, or learning journey documented?' },
+  { id:'assessment',   name:'Assessment & Measurement',             weight:1, desc:'Are there knowledge checks, assessments, or success metrics defined?' },
+  { id:'ojt',          name:'Operational Integration',              weight:1, desc:'Is OJT or system practice integrated and documented?' },
+  { id:'outbound',     name:'Shared Asset Dependencies (Outbound)', weight:3, desc:'Does content FROM this program live in other programs? Changes here may cascade — how many programs are affected and are they documented?' },
+  { id:'inbound',      name:'Shared Asset Dependencies (Inbound)',  weight:3, desc:'Does this program pull in content owned elsewhere? If another designer updates a shared asset, does this program break or go stale?' },
+  { id:'version',      name:'Version Control & File Hygiene',       weight:2, desc:'Are source files findable, consistently named, and in a shared location? Missing sources = reverse-engineering from published outputs.' },
+  { id:'audience',     name:'Audience Drift',                       weight:2, desc:'Has the intended audience changed since the original build? Significant audience change = redesign, not update.' },
+  { id:'trainer',      name:'Trainer / Facilitator Readiness',      weight:2, desc:'Is trainer knowledge documented independently of the trainer? Is the trainer aligned and bought in to the new design direction?' },
+];
+
+const SCORE_LABELS = ['None','Outdated','Gaps','Current'];
+const STORE_AUDITS = 'idt_audits_v1';
+let savedAudits = loadAudits();
+
+function loadAudits() { try { return JSON.parse(localStorage.getItem(STORE_AUDITS)) || []; } catch { return []; } }
+function saveAudits() { try { localStorage.setItem(STORE_AUDITS, JSON.stringify(savedAudits)); } catch(e) { console.warn(e); } }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ─── BUILD UI ──────────────────────────────────────────────────────────────
+function buildCategories() {
+  const container = document.getElementById('auditCategories');
+  container.innerHTML = CATEGORIES.map((cat, ci) => `
+    <div class="audit-category" id="cat_${cat.id}">
+      <div class="audit-category-header">
+        <div class="cat-name">${cat.name}</div>
+        <div class="cat-weight">Weight: <strong>${cat.weight}x</strong></div>
+      </div>
+      <div class="audit-category-body">
+        <div class="cat-description">${cat.desc}</div>
+        <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap">
+          <div class="score-selector">
+            ${[0,1,2,3].map(v => `
+              <label class="score-opt">
+                <input type="radio" name="score_${cat.id}" value="${v}" onchange="updateScore()" />
+                <div class="score-box">${v}</div>
+                <div class="score-lbl">${SCORE_LABELS[v]}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="weighted-pts" id="wp_${cat.id}">= <strong>—</strong> pts</div>
+        </div>
+        <input type="text" class="notes-input" id="notes_${cat.id}" placeholder="Notes (optional)..." />
+      </div>
+    </div>
+  `).join('');
+}
+
+function getScore(id) {
+  const sel = document.querySelector(`input[name="score_${id}"]:checked`);
+  return sel ? parseInt(sel.value) : null;
+}
+
+function getTierInfo(score) {
+  if (score === null || score < 0) return { label:'Not scored', cls:'tier-critical', color:'var(--red)', barColor:'var(--red)' };
+  if (score >= 72) return { label:'🟢 LOW DEBT',      cls:'tier-low',      color:'var(--low)',    barColor:'var(--green)' };
+  if (score >= 52) return { label:'🔵 MODERATE DEBT', cls:'tier-moderate', color:'var(--blue)',   barColor:'var(--blue)' };
+  if (score >= 29) return { label:'🟠 HIGH DEBT',     cls:'tier-high',     color:'var(--orange)', barColor:'var(--orange)' };
+  return              { label:'🔴 CRITICAL DEBT',     cls:'tier-critical', color:'var(--red)',    barColor:'var(--red)' };
+}
+
+function updateScore() {
+  let total = 0;
+  let allScored = true;
+  CATEGORIES.forEach(cat => {
+    const s = getScore(cat.id);
+    const wpEl = document.getElementById('wp_' + cat.id);
+    if (s !== null) {
+      const pts = s * cat.weight;
+      total += pts;
+      wpEl.innerHTML = `= <strong>${pts}</strong> pts`;
+    } else {
+      wpEl.innerHTML = `= <strong>—</strong> pts`;
+      allScored = false;
+    }
+  });
+
+  const maxPossible = CATEGORIES.reduce((s,c) => s + c.weight * 3, 0); // 90
+  const pct = Math.round((total / maxPossible) * 100);
+  const tier = getTierInfo(allScored ? total : null);
+
+  document.getElementById('liveScore').textContent = allScored ? total : '—';
+  document.getElementById('scoreBarFill').style.width = allScored ? pct + '%' : '0%';
+  document.getElementById('scoreBarFill').style.background = tier.barColor;
+  document.getElementById('scorePct').textContent = allScored ? `${pct}% of max score` : 'Score all categories to see result';
+
+  const badge = document.getElementById('tierBadge');
+  badge.textContent = allScored ? tier.label : 'Score all categories';
+  badge.className = 'tier-badge ' + (allScored ? tier.cls : 'tier-critical');
+
+  updateSummaryCard(total, tier, allScored);
+}
+
+// ─── SUMMARY CARD ──────────────────────────────────────────────────────────
+function updateSummaryCard(total, tier, allScored) {
+  document.getElementById('sc-programName').textContent = document.getElementById('programName').value || 'Untitled Program';
+  document.getElementById('sc-auditor').textContent = document.getElementById('auditedBy').value || '—';
+  document.getElementById('sc-date').textContent = new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('sc-score').textContent = allScored ? `${total} / 90` : 'Incomplete';
+
+  const tierEl = document.getElementById('sc-tier');
+  tierEl.textContent = tier.label;
+  tierEl.style.cssText = `background:${tier.barColor}20;color:${tier.color};border:2px solid ${tier.barColor};font-size:14px;font-weight:800;padding:8px 16px;border-radius:8px;`;
+
+  const tbody = document.getElementById('sc-tbody');
+  tbody.innerHTML = CATEGORIES.map(cat => {
+    const s = getScore(cat.id);
+    const pts = s !== null ? s * cat.weight : '—';
+    const notes = document.getElementById('notes_' + cat.id)?.value || '';
+    return `<tr>
+      <td>${cat.name}</td>
+      <td style="text-align:center">${cat.weight}x</td>
+      <td style="text-align:center;font-weight:700">${s !== null ? s : '—'}</td>
+      <td style="text-align:center;font-weight:700">${pts}</td>
+      <td style="color:#6b7f8c">${notes}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── SAVE ──────────────────────────────────────────────────────────────────
+function collectAuditData() {
+  const scores = {};
+  const notes = {};
+  CATEGORIES.forEach(cat => {
+    const s = getScore(cat.id);
+    scores[cat.id] = s;
+    notes[cat.id] = document.getElementById('notes_' + cat.id)?.value || '';
+  });
+  const total = CATEGORIES.reduce((sum, cat) => {
+    const s = scores[cat.id];
+    return sum + (s !== null ? s * cat.weight : 0);
+  }, 0);
+  const allScored = CATEGORIES.every(cat => scores[cat.id] !== null);
+  const tier = getTierInfo(allScored ? total : null);
+  return {
+    programName: document.getElementById('programName').value || 'Untitled Program',
+    auditedBy: document.getElementById('auditedBy').value || '',
+    scores, notes, total, allScored,
+    tierLabel: tier.label,
+    savedAt: new Date().toISOString()
+  };
+}
+
+function saveAudit() {
+  const data = collectAuditData();
+  const existing = savedAudits.findIndex(a => a.programName === data.programName);
+  if (existing >= 0) {
+    if (!confirm(`An audit for "${data.programName}" already exists. Replace it?`)) return;
+    data.id = savedAudits[existing].id;
+    savedAudits[existing] = data;
+  } else {
+    data.id = uid();
+    savedAudits.unshift(data);
+  }
+  saveAudits();
+  renderSavedAudits();
+  alert(`Audit for "${data.programName}" saved!`);
+}
+
+function loadAuditIntoForm(id) {
+  const a = savedAudits.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('programName').value = a.programName;
+  document.getElementById('auditedBy').value = a.auditedBy;
+  CATEGORIES.forEach(cat => {
+    const s = a.scores[cat.id];
+    if (s !== null && s !== undefined) {
+      const radio = document.querySelector(`input[name="score_${cat.id}"][value="${s}"]`);
+      if (radio) radio.checked = true;
+    }
+    const notesEl = document.getElementById('notes_' + cat.id);
+    if (notesEl) notesEl.value = a.notes[cat.id] || '';
+  });
+  updateScore();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function deleteAudit(id) {
+  if (!confirm('Delete this saved audit?')) return;
+  savedAudits = savedAudits.filter(a => a.id !== id);
+  saveAudits();
+  renderSavedAudits();
+}
+
+function renderSavedAudits() {
+  const el = document.getElementById('savedAudits');
+  if (!savedAudits.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei">🔍</div><p>No saved audits yet.</p></div>`;
+    return;
+  }
+  el.innerHTML = savedAudits.map(a => `
+    <div class="archive-item">
+      <div>
+        <div class="archive-name">${escHTML(a.programName)}</div>
+        <div class="archive-meta">${a.tierLabel} &nbsp;·&nbsp; Score: ${a.total}/90 &nbsp;·&nbsp; ${a.auditedBy ? 'By ' + escHTML(a.auditedBy) + ' &nbsp;·&nbsp; ' : ''}Saved ${new Date(a.savedAt).toLocaleDateString()}</div>
+      </div>
+      <div class="archive-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadAuditIntoForm('${a.id}')">Load</button>
+        <button class="btn btn-orange btn-sm" onclick="sendToPlannerFromSaved('${a.id}')">→ Planner</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAudit('${a.id}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── SEND TO PLANNER ───────────────────────────────────────────────────────
+function sendToPlanner() {
+  const data = collectAuditData();
+  pushToPlanner(data);
+}
+
+function sendToPlannerFromSaved(id) {
+  const a = savedAudits.find(x => x.id === id);
+  if (a) pushToPlanner(a);
+}
+
+function pushToPlanner(data) {
+  // localStorage primary
+  try { localStorage.setItem('idt_audit_handoff', JSON.stringify(data)); } catch(e) {}
+  // URL fallback
+  const params = new URLSearchParams({
+    program: data.programName,
+    tier: data.tierLabel,
+    score: data.total,
+    auditor: data.auditedBy
+  });
+  window.location.href = `program-planner.html?${params.toString()}`;
+}
+
+function clearAudit() {
+  if (!confirm('Clear all scores and start over?')) return;
+  document.getElementById('programName').value = '';
+  document.getElementById('auditedBy').value = '';
+  CATEGORIES.forEach(cat => {
+    document.querySelectorAll(`input[name="score_${cat.id}"]`).forEach(r => r.checked = false);
+    const n = document.getElementById('notes_' + cat.id);
+    if (n) n.value = '';
+    document.getElementById('wp_' + cat.id).innerHTML = '= <strong>—</strong> pts';
+  });
+  document.getElementById('liveScore').textContent = '—';
+  document.getElementById('scoreBarFill').style.width = '0%';
+  document.getElementById('tierBadge').textContent = 'Score all categories';
+  document.getElementById('tierBadge').className = 'tier-badge tier-critical';
+}
+
+function escHTML(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Init
+buildCategories();
+renderSavedAudits();
+</script>
+</body>
+</html>

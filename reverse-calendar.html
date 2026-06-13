@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reverse Calendar | ID Toolkit</title>
+<style>
+  :root {
+    --navy: #263746;
+    --green: #77BC1F;
+    --blue: #2172B7;
+    --orange: #FF8300;
+    --red: #d63b3b;
+    --navy-xlight: #eef1f4;
+    --green-light: #f0f8e6;
+    --orange-light: #fff4e6;
+    --red-light: #fdf0f0;
+    --text: #1a2730;
+    --muted: #6b7f8c;
+    --border: #d0dbe3;
+    --white: #ffffff;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Roboto','Segoe UI',sans-serif; background: var(--navy-xlight); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--navy); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 36px; height: 36px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: var(--white); }
+  .header-title { color: var(--white); font-size: 15px; font-weight: 500; opacity: .85; }
+  .header-title span { color: var(--green); font-weight: 700; opacity: 1; }
+  .back-link { color: var(--border); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+  .back-link:hover { color: var(--white); }
+
+  .page-hero { background: var(--navy); padding: 32px 32px 40px; border-bottom: 4px solid var(--green); }
+  .page-hero h1 { color: var(--white); font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .page-hero p { color: rgba(255,255,255,.65); font-size: 14px; max-width: 520px; }
+
+  .main { max-width: 980px; margin: 0 auto; padding: 32px 24px 64px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+  .card { background: var(--white); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; }
+  .card-header { background: var(--navy); padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
+  .card-header h2 { color: var(--white); font-size: 14px; font-weight: 600; letter-spacing: .3px; }
+  .card-body { padding: 20px; }
+  .card-full { grid-column: 1 / -1; }
+
+  .direction-toggle { display: flex; background: var(--navy-xlight); border-radius: var(--radius); padding: 4px; gap: 4px; margin-bottom: 20px; }
+  .dir-btn { flex: 1; padding: 10px 8px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; background: transparent; color: var(--muted); }
+  .dir-btn.active { background: var(--navy); color: var(--white); box-shadow: 0 2px 6px rgba(38,55,70,.25); }
+
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--navy); margin-bottom: 6px; letter-spacing: .4px; text-transform: uppercase; }
+  input[type="text"], input[type="date"], input[type="number"] { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: inherit; color: var(--text); transition: border-color .2s; background: var(--white); }
+  input:focus { outline: none; border-color: var(--blue); }
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .date-hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+  /* BUDGET BOX */
+  .budget-box { background: var(--navy-xlight); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; border: 1.5px solid var(--border); }
+  .budget-row { display: flex; align-items: center; gap: 12px; }
+  .budget-row input[type="number"] { width: 90px; flex-shrink: 0; font-weight: 700; font-size: 15px; text-align: center; }
+  .budget-meta { flex: 1; }
+  .budget-meta .bm-label { font-size: 12px; color: var(--muted); }
+  .budget-meta .bm-default { font-size: 12px; color: var(--navy); font-weight: 600; margin-top: 2px; }
+  .budget-btn { padding: 8px 14px; background: var(--blue); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background .2s; }
+  .budget-btn:hover { background: #1860a0; }
+  .budget-warning { font-size: 12px; margin-top: 8px; padding: 6px 10px; border-radius: 6px; display: none; }
+  .budget-warning.show { display: block; }
+  .budget-warning.warn { background: var(--orange-light); color: #b35a00; border: 1px solid #f5c57a; }
+  .budget-warning.danger { background: var(--red-light); color: var(--red); border: 1px solid #f5a0a0; }
+
+  /* PHASES */
+  .phases-label { font-size: 12px; font-weight: 600; color: var(--navy); letter-spacing: .4px; text-transform: uppercase; margin-bottom: 10px; }
+  .phase-row { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius); border: 1.5px solid var(--border); margin-bottom: 8px; transition: border-color .2s, background .2s; }
+  .phase-row.active { border-color: var(--green); background: var(--green-light); }
+  .phase-row.compressed { border-color: var(--orange); background: var(--orange-light); }
+  .phase-row.compressed.heavy { border-color: var(--red); background: var(--red-light); }
+  .phase-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--green); cursor: pointer; }
+  .phase-info .phase-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .phase-info .phase-bd-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .phase-stepper { display: flex; align-items: center; gap: 4px; }
+  .step-btn { width: 22px; height: 22px; border-radius: 4px; border: 1.5px solid var(--border); background: var(--white); font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--navy); transition: all .15s; line-height: 1; padding: 0; }
+  .step-btn:hover { background: var(--navy); color: var(--white); border-color: var(--navy); }
+  .step-val { font-size: 13px; font-weight: 700; color: var(--navy); min-width: 28px; text-align: center; }
+  .bd-label { font-size: 11px; color: var(--muted); }
+  .compress-pill { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .compress-pill.orange { background: #FFE0B2; color: #b35a00; }
+  .compress-pill.red { background: #FFCDD2; color: #b71c1c; }
+  .compress-pill.green { background: #DCEDC8; color: #33691e; }
+  .phase-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .phase-optional-tag { font-size: 10px; background: var(--orange); color: white; padding: 2px 6px; border-radius: 10px; font-weight: 600; }
+
+  .calc-btn { width: 100%; padding: 14px; background: var(--green); color: var(--white); border: none; border-radius: var(--radius); font-size: 15px; font-weight: 700; cursor: pointer; transition: background .2s, transform .1s; letter-spacing: .3px; margin-top: 4px; }
+  .calc-btn:hover { background: #68a619; }
+  .calc-btn:active { transform: scale(.99); }
+
+  /* RESULTS */
+  .results-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+  .results-empty .icon { font-size: 36px; margin-bottom: 10px; }
+
+  .summary-bar { background: var(--navy); border-radius: var(--radius); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .summary-item { text-align: center; }
+  .summary-item .s-label { color: rgba(255,255,255,.6); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+  .summary-item .s-value { color: var(--green); font-size: 14px; font-weight: 700; margin-top: 2px; }
+  .summary-item .s-value.white { color: white; }
+
+  /* COMPRESSION SUMMARY */
+  .compress-summary { border-radius: var(--radius); padding: 12px 16px; margin-bottom: 20px; font-size: 13px; }
+  .compress-summary.warn { background: var(--orange-light); border: 1px solid #f5c57a; color: #7a3e00; }
+  .compress-summary.danger { background: var(--red-light); border: 1px solid #f5a0a0; color: #7a0000; }
+  .compress-summary strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .compress-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .compress-list li::before { content: '⚠ '; }
+  .compress-list li.heavy::before { content: '🔴 '; }
+
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item { display: flex; gap: 16px; position: relative; }
+  .timeline-left { display: flex; flex-direction: column; align-items: center; width: 32px; flex-shrink: 0; }
+  .timeline-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 700; flex-shrink: 0; z-index: 1; }
+  .timeline-dot.opt { background: var(--blue); }
+  .timeline-dot.launch { background: var(--green); }
+  .timeline-line { width: 2px; flex: 1; background: var(--border); margin: 4px 0; min-height: 16px; }
+  .timeline-content { flex: 1; padding-bottom: 20px; }
+  .timeline-item:last-child .timeline-content { padding-bottom: 0; }
+  .timeline-phase { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+  .timeline-item.launch-item .timeline-phase { color: var(--green); font-size: 14px; }
+  .timeline-dates { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .timeline-dates strong { color: var(--blue); }
+  .timeline-dates strong.end { color: var(--green); }
+  .timeline-bd { display: inline-block; font-size: 11px; background: var(--navy-xlight); color: var(--navy); border-radius: 4px; padding: 2px 6px; font-weight: 600; }
+  .timeline-compress { display: inline-block; font-size: 11px; border-radius: 4px; padding: 2px 6px; font-weight: 600; margin-left: 6px; }
+  .timeline-compress.orange { background: #FFE0B2; color: #b35a00; }
+  .timeline-compress.red { background: #FFCDD2; color: #b71c1c; }
+  .timeline-compress.green { background: #DCEDC8; color: #33691e; }
+
+  .actions-row { display: flex; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .action-btn { flex: 1; padding: 10px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); background: var(--white); color: var(--navy); transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .action-btn:hover { border-color: var(--navy); background: var(--navy-xlight); }
+
+  @media print {
+    header, .page-hero, .card:not(.card-full), .actions-row, .calc-btn { display: none; }
+    .main { grid-template-columns: 1fr; padding: 0; }
+    .card-full { grid-column: 1; }
+    body { background: white; }
+  }
+  @media (max-width: 640px) {
+    .main { grid-template-columns: 1fr; }
+    .page-hero, header { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="header-logo">ID</div>
+    <div class="header-title"><span>ID Toolkit</span></div>
+  </div>
+  <a href="index.html" class="back-link">← All Tools</a>
+</header>
+
+<div class="page-hero">
+  <h1>📅 Reverse Calendar</h1>
+  <p>Enter a launch date or start date — milestones calculate automatically, skipping weekends and federal holidays. Set a rush budget to compress the timeline.</p>
+</div>
+
+<div class="main">
+
+  <!-- LEFT: PROJECT SETUP -->
+  <div class="card">
+    <div class="card-header"><span>⚙️</span><h2>Project Setup</h2></div>
+    <div class="card-body">
+
+      <div class="field">
+        <label>Project Name</label>
+        <input type="text" id="projectName" placeholder="e.g., New Hire Security Awareness" />
+      </div>
+
+      <div class="field">
+        <label>Calculate Direction</label>
+        <div class="direction-toggle">
+          <button class="dir-btn active" id="btnBackward" onclick="setDirection('backward')">← From Launch Date</button>
+          <button class="dir-btn" id="btnForward" onclick="setDirection('forward')">From Start Date →</button>
+        </div>
+        <div class="date-hint" id="dirHint">Enter the desired launch date — milestones calculate backward.</div>
+      </div>
+
+      <div class="field">
+        <label id="dateLabel">Launch / Due Date</label>
+        <input type="date" id="anchorDate" />
+      </div>
+
+      <!-- BUDGET BOX -->
+      <div class="field">
+        <label>Rush Budget (optional)</label>
+        <div class="budget-box">
+          <div class="budget-row">
+            <input type="number" id="budgetInput" min="5" max="500" placeholder="—" />
+            <div class="budget-meta">
+              <div class="bm-label">Total business days available</div>
+              <div class="bm-default" id="budgetDefault">Standard: 67 BD (all phases)</div>
+            </div>
+            <button class="budget-btn" onclick="applyBudget()">Distribute</button>
+          </div>
+          <div class="budget-warning" id="budgetWarning"></div>
+        </div>
+        <div class="date-hint">Enter a total BD budget to proportionally compress active phases, then fine-tune each phase below.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT: PHASES -->
+  <div class="card">
+    <div class="card-header"><span>🗂️</span><h2>Active Phases &amp; Durations</h2></div>
+    <div class="card-body">
+      <p class="phases-label">Toggle phases · adjust days per phase</p>
+      <div id="phaseList"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">🟡 Compressed &nbsp;|&nbsp; 🔴 Heavily compressed &nbsp;|&nbsp; 🟢 Expanded</div>
+    </div>
+  </div>
+
+  <!-- GENERATE BUTTON -->
+  <div class="card-full" style="background:transparent;border:none;padding:0;margin-top:-8px;">
+    <button class="calc-btn" onclick="calculate()">Generate Timeline →</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="card card-full">
+    <div class="card-header"><span>📋</span><h2>Project Timeline</h2></div>
+    <div class="card-body" id="resultsBody">
+      <div class="results-empty">
+        <div class="icon">📅</div>
+        <div>Set up your project and click <strong>Generate Timeline</strong> to see your milestones.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── HOLIDAYS ──────────────────────────────────────────────────────────────
+function getFederalHolidays() {
+  const h = new Set();
+  const years = [2024,2025,2026,2027,2028,2029,2030];
+  function add(y,m,d) {
+    const dt = new Date(y,m-1,d);
+    const dow = dt.getDay();
+    if (dow===6) dt.setDate(dt.getDate()-1);
+    else if (dow===0) dt.setDate(dt.getDate()+1);
+    h.add(dt.toDateString());
+  }
+  function nth(y,m,n,wd) {
+    if (n>0) { const d=new Date(y,m-1,1); let c=0; while(true){if(d.getDay()===wd){c++;if(c===n)return new Date(d);} d.setDate(d.getDate()+1);} }
+    else { const d=new Date(y,m,0); while(d.getDay()!==wd) d.setDate(d.getDate()-1); return new Date(d); }
+  }
+  years.forEach(y=>{
+    add(y,1,1); h.add(nth(y,1,3,1).toDateString()); h.add(nth(y,2,3,1).toDateString());
+    h.add(nth(y,5,-1,1).toDateString()); add(y,6,19); add(y,7,4);
+    h.add(nth(y,9,1,1).toDateString()); h.add(nth(y,10,2,1).toDateString());
+    add(y,11,11); h.add(nth(y,11,4,4).toDateString()); add(y,12,25);
+  });
+  return h;
+}
+const HOLIDAYS = getFederalHolidays();
+function isBD(d) { const w=d.getDay(); return w!==0&&w!==6&&!HOLIDAYS.has(d.toDateString()); }
+function addBD(date,n) {
+  const d=new Date(date); const step=n>=0?1:-1; let rem=Math.abs(n);
+  while(rem>0){d.setDate(d.getDate()+step);if(isBD(d))rem--;} return d;
+}
+function subBD(date,n){return addBD(date,-n);}
+function fmt(d){return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});}
+
+// ─── PHASE DEFINITIONS ─────────────────────────────────────────────────────
+const DEFAULT_PHASES = [
+  {id:'readiness', name:'Readiness Meeting',       defaultBd:3,  optional:false, emoji:'🤝'},
+  {id:'na',        name:'Needs Analysis Meeting',  defaultBd:5,  optional:true,  emoji:'🔍'},
+  {id:'proposal',  name:'Project Proposal',        defaultBd:17, optional:false, emoji:'📝'},
+  {id:'design',    name:'Design / Develop',        defaultBd:17, optional:false, emoji:'🎨'},
+  {id:'revisions', name:'Revisions',               defaultBd:14, optional:true,  emoji:'✏️'},
+  {id:'approval',  name:'Final Approval',          defaultBd:6,  optional:false, emoji:'✅'},
+  {id:'launch',    name:'Testing, Launch & Close', defaultBd:5,  optional:false, emoji:'🚀'},
+];
+
+// Live state — currentBd can be adjusted
+let phaseState = DEFAULT_PHASES.map(p=>({...p, currentBd: p.defaultBd, active: true}));
+
+let direction = 'backward';
+
+function setDirection(dir) {
+  direction = dir;
+  document.getElementById('btnBackward').classList.toggle('active', dir==='backward');
+  document.getElementById('btnForward').classList.toggle('active', dir==='forward');
+  document.getElementById('dateLabel').textContent = dir==='backward' ? 'Launch / Due Date' : 'Project Start Date';
+  document.getElementById('dirHint').textContent = dir==='backward'
+    ? 'Enter the desired launch date — milestones calculate backward.'
+    : 'Enter the project start date — milestones project forward.';
+}
+
+// ─── BUILD PHASE LIST ──────────────────────────────────────────────────────
+function buildPhaseList() {
+  const container = document.getElementById('phaseList');
+  container.innerHTML = '';
+  phaseState.forEach((p, idx) => {
+    const diff = p.currentBd - p.defaultBd;
+    let pillHTML = '';
+    let rowClass = p.active ? 'active' : '';
+    if (p.active && diff < 0) {
+      const pct = Math.round((diff / p.defaultBd) * 100);
+      const heavy = pct <= -40;
+      rowClass = heavy ? 'compressed heavy' : 'compressed';
+      pillHTML = `<span class="compress-pill ${heavy?'red':'orange'}">${diff} BD (${pct}%)</span>`;
+    } else if (p.active && diff > 0) {
+      pillHTML = `<span class="compress-pill green">+${diff} BD</span>`;
+    }
+
+    const row = document.createElement('div');
+    row.className = `phase-row ${rowClass}`;
+    row.id = `row_${p.id}`;
+    row.innerHTML = `
+      <input type="checkbox" id="chk_${p.id}" ${p.active?'checked':''} ${!p.optional?'disabled':''} onchange="togglePhase('${p.id}',this.checked)" />
+      <div class="phase-info">
+        <div class="phase-name">${p.emoji} ${p.name}</div>
+        <div class="phase-bd-row">
+          <div class="phase-stepper">
+            <button class="step-btn" onclick="adjustBd('${p.id}',-1)" ${!p.active?'disabled':''}>−</button>
+            <span class="step-val" id="val_${p.id}">${p.currentBd}</span>
+            <button class="step-btn" onclick="adjustBd('${p.id}',1)" ${!p.active?'disabled':''}>+</button>
+          </div>
+          <span class="bd-label">BD &nbsp;|&nbsp; default: ${p.defaultBd}</span>
+          ${pillHTML}
+        </div>
+      </div>
+      <div class="phase-right">
+        ${p.optional ? '<span class="phase-optional-tag">Optional</span>' : ''}
+      </div>
+    `;
+    container.appendChild(row);
+  });
+  updateBudgetDefault();
+}
+
+function togglePhase(id, checked) {
+  const p = phaseState.find(x=>x.id===id);
+  if (p) { p.active = checked; buildPhaseList(); }
+}
+
+function adjustBd(id, delta) {
+  const p = phaseState.find(x=>x.id===id);
+  if (!p) return;
+  p.currentBd = Math.max(1, p.currentBd + delta);
+  buildPhaseList();
+}
+
+// ─── BUDGET DISTRIBUTION ───────────────────────────────────────────────────
+function updateBudgetDefault() {
+  const active = phaseState.filter(p=>p.active);
+  const total = active.reduce((s,p)=>s+p.defaultBd,0);
+  document.getElementById('budgetDefault').textContent = `Standard: ${total} BD (${active.length} active phases)`;
+}
+
+function applyBudget() {
+  const val = parseInt(document.getElementById('budgetInput').value);
+  const warn = document.getElementById('budgetWarning');
+  const active = phaseState.filter(p=>p.active);
+  const totalDefault = active.reduce((s,p)=>s+p.defaultBd,0);
+
+  warn.className = 'budget-warning';
+  warn.textContent = '';
+
+  if (!val || val < 1) { warn.className='budget-warning show warn'; warn.textContent='Enter a valid number of business days.'; return; }
+
+  const ratio = val / totalDefault;
+
+  // Distribute proportionally, minimum 1 BD per phase
+  let distributed = active.map(p => ({id:p.id, bd: Math.max(1, Math.round(p.defaultBd * ratio))}));
+
+  // Correct rounding drift
+  let sum = distributed.reduce((s,x)=>s+x.bd,0);
+  let diff = val - sum;
+  // Add/remove from largest phases first
+  const sorted = [...distributed].sort((a,b)=>b.bd-a.bd);
+  let i = 0;
+  while (diff !== 0 && i < sorted.length) {
+    const target = distributed.find(x=>x.id===sorted[i].id);
+    if (diff > 0) { target.bd++; diff--; }
+    else if (target.bd > 1) { target.bd--; diff++; }
+    i++;
+  }
+
+  distributed.forEach(item => {
+    const p = phaseState.find(x=>x.id===item.id);
+    if (p) p.currentBd = item.bd;
+  });
+
+  buildPhaseList();
+
+  // Warning messaging
+  if (ratio < 0.4) {
+    warn.className = 'budget-warning show danger';
+    warn.textContent = `⚠️ ${val} BD is less than 40% of the standard timeline. Phases are heavily compressed — review each one carefully.`;
+  } else if (ratio < 0.7) {
+    warn.className = 'budget-warning show warn';
+    warn.textContent = `This budget compresses the standard timeline by ${Math.round((1-ratio)*100)}%. Fine-tune phases below as needed.`;
+  } else if (ratio > 1) {
+    warn.className = 'budget-warning show warn';
+    warn.style.background='#f0f8e6'; warn.style.borderColor='#b7df7a'; warn.style.color='#3a6600';
+    warn.textContent = `Budget exceeds the standard timeline — phases have been expanded proportionally.`;
+  }
+}
+
+// ─── CALCULATE ─────────────────────────────────────────────────────────────
+function calculate() {
+  const anchor = document.getElementById('anchorDate').value;
+  if (!anchor) { alert('Please enter a date to generate your timeline.'); return; }
+
+  const anchorDate = new Date(anchor + 'T12:00:00');
+  const projectName = document.getElementById('projectName').value || 'Untitled Project';
+  const active = phaseState.filter(p=>p.active);
+
+  let milestones = [];
+
+  if (direction === 'backward') {
+    let cursor = new Date(anchorDate);
+    [...active].reverse().forEach(p => {
+      const end = new Date(cursor);
+      const start = subBD(cursor, p.currentBd);
+      milestones.unshift({phase:p, start, end});
+      cursor = new Date(start);
+      cursor.setDate(cursor.getDate()-1);
+    });
+  } else {
+    let cursor = new Date(anchorDate);
+    active.forEach(p => {
+      const start = new Date(cursor);
+      const end = addBD(cursor, p.currentBd);
+      milestones.push({phase:p, start, end});
+      cursor = new Date(end);
+      cursor.setDate(cursor.getDate()+1);
+    });
+  }
+
+  renderResults(projectName, milestones, active);
+}
+
+// ─── RENDER ────────────────────────────────────────────────────────────────
+function renderResults(projectName, milestones, active) {
+  const totalBD = active.reduce((s,p)=>s+p.currentBd,0);
+  const totalDefault = active.reduce((s,p)=>s+p.defaultBd,0);
+  const startDate = milestones[0].start;
+  const endDate = milestones[milestones.length-1].end;
+
+  // Compression analysis
+  const compressed = active.filter(p=>p.currentBd < p.defaultBd);
+  const expanded = active.filter(p=>p.currentBd > p.defaultBd);
+
+  let compressSummaryHTML = '';
+  if (compressed.length > 0) {
+    const isHeavy = compressed.some(p=>((p.currentBd-p.defaultBd)/p.defaultBd)<=-0.4);
+    compressSummaryHTML = `
+      <div class="compress-summary ${isHeavy?'danger':'warn'}">
+        <strong>${isHeavy?'⚠️ Heavy compression detected':'📉 Compressed timeline'} — ${totalBD} BD vs. ${totalDefault} BD standard</strong>
+        <ul class="compress-list">
+          ${compressed.map(p=>{
+            const diff=p.currentBd-p.defaultBd;
+            const pct=Math.round((diff/p.defaultBd)*100);
+            const heavy=pct<=-40;
+            return `<li class="${heavy?'heavy':''}">${p.emoji} ${p.name}: ${p.defaultBd} BD → ${p.currentBd} BD (${diff} days, ${pct}%)</li>`;
+          }).join('')}
+        </ul>
+      </div>`;
+  }
+
+  const totalDiffBD = totalBD - totalDefault;
+  const totalDiffLabel = totalDiffBD === 0 ? `${totalBD} BD (standard)` : totalDiffBD < 0 ? `${totalBD} BD (${totalDiffBD} vs. standard)` : `${totalBD} BD (+${totalDiffBD} vs. standard)`;
+
+  const summaryHTML = `
+    <div class="summary-bar">
+      <div class="summary-item"><div class="s-label">Project</div><div class="s-value white" style="font-size:13px">${projectName}</div></div>
+      <div class="summary-item"><div class="s-label">Start</div><div class="s-value">${fmt(startDate)}</div></div>
+      <div class="summary-item"><div class="s-label">Launch</div><div class="s-value">${fmt(endDate)}</div></div>
+      <div class="summary-item"><div class="s-label">Total Business Days</div><div class="s-value">${totalDiffLabel}</div></div>
+    </div>`;
+
+  const timelineHTML = milestones.map((m,i)=>{
+    const isLast = i===milestones.length-1;
+    const diff = m.phase.currentBd - m.phase.defaultBd;
+    const pct = diff!==0 ? Math.round((diff/m.phase.defaultBd)*100) : 0;
+    const heavy = pct<=-40;
+    let compressTag='';
+    if (diff<0) compressTag=`<span class="timeline-compress ${heavy?'red':'orange'}">${diff} BD (${pct}%)</span>`;
+    else if (diff>0) compressTag=`<span class="timeline-compress green">+${diff} BD</span>`;
+
+    return `
+      <div class="timeline-item ${isLast?'launch-item':''}">
+        <div class="timeline-left">
+          <div class="timeline-dot ${isLast?'launch':m.phase.optional?'opt':''}">${i+1}</div>
+          ${!isLast?'<div class="timeline-line"></div>':''}
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-phase">${m.phase.emoji} ${m.phase.name}</div>
+          <div class="timeline-dates">From <strong>${fmt(m.start)}</strong> → <strong class="end">${fmt(m.end)}</strong></div>
+          <span class="timeline-bd">${m.phase.currentBd} BD</span>${compressTag}
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('resultsBody').innerHTML =
+    summaryHTML + compressSummaryHTML +
+    `<div class="timeline">${timelineHTML}</div>` +
+    `<div class="actions-row">
+      <button class="action-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+      <button class="action-btn" onclick="copyTimeline()">📋 Copy to Clipboard</button>
+    </div>`;
+
+  window._lastMilestones = milestones;
+  window._lastProject = projectName;
+}
+
+function copyTimeline() {
+  if (!window._lastMilestones) return;
+  const lines = [`Project: ${window._lastProject}`, ''];
+  window._lastMilestones.forEach((m,i)=>{
+    const diff=m.phase.currentBd-m.phase.defaultBd;
+    const note=diff<0?` [compressed ${diff} BD]`:diff>0?` [expanded +${diff} BD]`:'';
+    lines.push(`${i+1}. ${m.phase.name}${note}`);
+    lines.push(`   Start:    ${fmt(m.start)}`);
+    lines.push(`   Due:      ${fmt(m.end)}`);
+    lines.push(`   Duration: ${m.phase.currentBd} BD (standard: ${m.phase.defaultBd} BD)`);
+    lines.push('');
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>alert('Timeline copied to clipboard!'));
+}
+
+// Init
+buildPhaseList();
+</script>
+</body>
+</html>
