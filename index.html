@@ -6,184 +6,46 @@
 <title>The ID Toolkit</title>
 <style>
   :root {
-    --navy: #263746;
-    --green: #77BC1F;
-    --blue: #2172B7;
-    --orange: #FF8300;
-    --navy-light: #344d5e;
-    --navy-xlight: #eef1f4;
-    --text: #1a2730;
-    --muted: #6b7f8c;
-    --border: #d0dbe3;
-    --white: #ffffff;
-    --radius: 10px;
-    --radius-lg: 16px;
+    --navy: #263746; --green: #77BC1F; --blue: #2172B7; --orange: #FF8300;
+    --navy-xlight: #eef1f4; --text: #1a2730; --muted: #6b7f8c;
+    --border: #d0dbe3; --white: #ffffff; --radius: 10px; --radius-lg: 16px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Roboto', 'Segoe UI', sans-serif;
-    background: var(--navy-xlight);
-    color: var(--text);
-    min-height: 100vh;
-  }
+  body { font-family: 'Roboto','Segoe UI',sans-serif; background: var(--navy-xlight); color: var(--text); min-height: 100vh; }
 
   /* HERO */
-  .hero {
-    background: var(--navy);
-    padding: 60px 32px 80px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--green), var(--blue), var(--orange));
-  }
-  .hero-badge {
-    display: inline-block;
-    background: rgba(119,188,31,0.15);
-    border: 1px solid rgba(119,188,31,0.4);
-    color: var(--green);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 20px;
-    margin-bottom: 20px;
-  }
-  .hero h1 {
-    color: var(--white);
-    font-size: 42px;
-    font-weight: 800;
-    line-height: 1.15;
-    margin-bottom: 14px;
-    letter-spacing: -0.5px;
-  }
+  .hero { background: var(--navy); padding: 56px 32px 72px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background: linear-gradient(90deg, var(--green), var(--blue), var(--orange)); }
+  .hero h1 { color: white; font-size: 42px; font-weight: 800; line-height: 1.15; margin-bottom: 14px; letter-spacing: -.5px; }
   .hero h1 span { color: var(--green); }
-  .hero p {
-    color: rgba(255,255,255,0.6);
-    font-size: 16px;
-    max-width: 480px;
-    margin: 0 auto 10px;
-    line-height: 1.6;
-  }
-  .hero-sub {
-    color: rgba(255,255,255,0.35);
-    font-size: 13px;
-    margin-top: 16px;
-  }
+  .hero p { color: rgba(255,255,255,.6); font-size: 16px; max-width: 480px; margin: 0 auto; line-height: 1.6; }
 
-  /* TOOLS GRID */
-  .grid-section {
-    max-width: 860px;
-    margin: -32px auto 0;
-    padding: 0 24px 64px;
-  }
-
-  .section-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 16px;
-    padding-top: 48px;
-  }
-
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 16px;
-  }
+  /* GRID */
+  .grid-section { max-width: 920px; margin: -32px auto 0; padding: 0 24px 64px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; padding-top: 44px; display: flex; align-items: center; gap: 10px; }
+  .section-label::after { content:''; flex:1; height:1px; background: var(--border); }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
 
   /* TOOL CARD */
-  .tool-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    border: 1.5px solid var(--border);
-    padding: 24px;
-    text-decoration: none;
-    display: block;
-    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .tool-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--accent, var(--green));
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.2s;
-  }
-  .tool-card:hover {
-    border-color: var(--accent, var(--green));
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(38,55,70,0.12);
-  }
+  .tool-card { background: var(--white); border-radius: var(--radius-lg); border: 1.5px solid var(--border); padding: 24px; text-decoration: none; display: block; transition: border-color .2s, transform .15s, box-shadow .2s; position: relative; overflow: hidden; }
+  .tool-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background: var(--accent, var(--green)); transform:scaleX(0); transform-origin:left; transition:transform .2s; }
+  .tool-card:hover { border-color: var(--accent, var(--green)); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(38,55,70,.12); }
   .tool-card:hover::after { transform: scaleX(1); }
+  .tool-card.coming-soon { opacity: .5; pointer-events: none; }
 
-  .tool-card.coming-soon {
-    opacity: 0.55;
-    pointer-events: none;
-  }
+  .tool-emoji { font-size: 30px; margin-bottom: 12px; display: block; }
+  .tool-name { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .tool-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .tool-tag { display: inline-block; margin-top: 14px; font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; }
+  .tag-ready { background: rgba(119,188,31,.12); color: var(--green); }
+  .tag-soon  { background: rgba(107,127,140,.12); color: var(--muted); }
 
-  .tool-emoji {
-    font-size: 32px;
-    margin-bottom: 14px;
-    display: block;
-  }
-  .tool-name {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 6px;
-  }
-  .tool-desc {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.55;
-  }
-  .tool-tag {
-    display: inline-block;
-    margin-top: 14px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    border-radius: 6px;
-  }
-  .tag-ready {
-    background: rgba(119,188,31,0.12);
-    color: var(--green);
-  }
-  .tag-soon {
-    background: rgba(107,127,140,0.12);
-    color: var(--muted);
-  }
+  .card-green  { --accent: var(--green); }
+  .card-blue   { --accent: var(--blue); }
+  .card-orange { --accent: var(--orange); }
+  .card-red    { --accent: #d63b3b; }
 
-  /* ACCENT COLORS PER CARD */
-  .card-green { --accent: var(--green); }
-  .card-blue  { --accent: var(--blue); }
-  .card-orange{ --accent: var(--orange); }
-
-  /* FOOTER */
-  footer {
-    text-align: center;
-    padding: 32px;
-    border-top: 1px solid var(--border);
-    font-size: 12px;
-    color: var(--muted);
-  }
+  footer { text-align: center; padding: 32px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
   footer strong { color: var(--navy); }
 
   @media (max-width: 560px) {
@@ -201,9 +63,16 @@
 
 <div class="grid-section">
 
-  <div class="section-label">Planning Tools</div>
-
+  <!-- SECTION 1 -->
+  <div class="section-label">Intake & Scoring</div>
   <div class="tools-grid">
+
+    <a href="complexity-scorer.html" class="tool-card card-blue">
+      <span class="tool-emoji">⚖️</span>
+      <div class="tool-name">Complexity & Readiness Scorer</div>
+      <div class="tool-desc">PM scores readiness and complexity at intake. Designer confirms complexity post-Needs Analysis. Flags variance over 5 points, recommends designer assignment, and logs monthly data to the team sheet.</div>
+      <span class="tool-tag tag-ready">✓ Ready</span>
+    </a>
 
     <a href="project-estimator.html" class="tool-card card-green">
       <span class="tool-emoji">🧮</span>
@@ -212,44 +81,54 @@
       <span class="tool-tag tag-ready">✓ Ready</span>
     </a>
 
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section-label">Planning & Scheduling</div>
+  <div class="tools-grid">
+
     <a href="reverse-calendar.html" class="tool-card card-blue">
       <span class="tool-emoji">📅</span>
       <div class="tool-name">Reverse Calendar</div>
-      <div class="tool-desc">Enter a launch date or start date — get every project milestone automatically, skipping weekends and federal holidays.</div>
+      <div class="tool-desc">Enter a launch date or start date — every milestone calculates automatically, skipping weekends and federal holidays. Rush budget compresses phases proportionally.</div>
       <span class="tool-tag tag-ready">✓ Ready</span>
     </a>
 
     <a href="weekly-planner.html" class="tool-card card-orange">
       <span class="tool-emoji">🗓️</span>
       <div class="tool-name">Weekly Planner</div>
-      <div class="tool-desc">Map your week across active projects by priority, track capacity against your 32-hour design week, and archive past weeks.</div>
+      <div class="tool-desc">Map your week across active projects and deliverables by priority. Tracks capacity against your 32-hour design week, flags P3/P4 overload when P1/P2 work exists, and archives past weeks.</div>
       <span class="tool-tag tag-ready">✓ Ready</span>
     </a>
+
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section-label">Program Overhaul Tools</div>
+  <div class="tools-grid">
 
     <a href="content-debt-audit.html" class="tool-card card-orange">
       <span class="tool-emoji">🔍</span>
       <div class="tool-name">Content Debt Audit</div>
-      <div class="tool-desc">Score existing program materials across 15 weighted areas to determine debt tier before complexity scoring. Results feed directly into the Program Planner.</div>
+      <div class="tool-desc">Score existing program materials across 15 weighted areas to determine debt tier before complexity scoring. Run as a joint session with the training group. Results feed the Program Planner.</div>
       <span class="tool-tag tag-ready">✓ Ready</span>
     </a>
 
     <a href="program-deliverable-inventory.html" class="tool-card card-blue">
       <span class="tool-emoji">📦</span>
       <div class="tool-name">Program Deliverable Inventory</div>
-      <div class="tool-desc">Trainers catalog every piece of content before the Architecture meeting. Designers add estimates and rebuild decisions. Joint view feeds the Program Planner and Architecture proposal.</div>
+      <div class="tool-desc">Trainers catalog every piece of content before the Architecture meeting. Designers add estimates, rebuild decisions, and dependency flags. Joint view feeds the Architecture proposal and Program Planner.</div>
       <span class="tool-tag tag-ready">✓ Ready</span>
     </a>
 
     <a href="program-planner.html" class="tool-card card-green">
       <span class="tool-emoji">📋</span>
       <div class="tool-name">Program Planner</div>
-      <div class="tool-desc">Estimate hours for program-level overhauls across 12 phases with multipliers and calendar conversion. Generates a Scope Card for stakeholders.</div>
+      <div class="tool-desc">Estimate hours for program-level overhauls across 12 phases with multipliers and calendar conversion. Receives data from the Content Debt Audit. Generates a Scope Card for stakeholders.</div>
       <span class="tool-tag tag-ready">✓ Ready</span>
     </a>
 
   </div>
-
-
 
 </div>
 
