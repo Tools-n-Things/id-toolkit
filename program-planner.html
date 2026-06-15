@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Program Planner | ID Toolkit</title>
+<style>
+  :root {
+    --navy: #263746; --green: #77BC1F; --blue: #2172B7; --orange: #FF8300; --red: #d63b3b;
+    --navy-xlight: #eef1f4; --green-light: #f0f8e6; --orange-light: #fff4e6; --red-light: #fdf0f0;
+    --text: #1a2730; --muted: #6b7f8c; --border: #d0dbe3; --white: #ffffff;
+    --radius: 8px; --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Roboto','Segoe UI',sans-serif; background: var(--navy-xlight); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--navy); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 36px; height: 36px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: white; }
+  .header-title { color: white; font-size: 15px; font-weight: 500; opacity: .85; }
+  .header-title span { color: var(--green); font-weight: 700; opacity: 1; }
+  .back-link { color: var(--border); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+  .back-link:hover { color: white; }
+
+  .page-hero { background: var(--navy); padding: 28px 32px 36px; border-bottom: 4px solid var(--green); }
+  .page-hero h1 { color: white; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .page-hero p { color: rgba(255,255,255,.6); font-size: 14px; max-width: 600px; }
+
+  /* HANDOFF BANNER */
+  .handoff-banner { background: linear-gradient(135deg, #1a6b2a, #2d8f3e); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .handoff-banner .hb-text { color: white; font-size: 13px; }
+  .handoff-banner .hb-text strong { display: block; font-size: 15px; margin-bottom: 2px; }
+  .handoff-banner .hb-dismiss { background: rgba(255,255,255,.2); border: none; color: white; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 600; }
+
+  .main { max-width: 980px; margin: 0 auto; padding: 28px 24px 64px; }
+
+  .card { background: var(--white); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+  .card-header { background: var(--navy); padding: 13px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .card-header h2 { color: white; font-size: 14px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  label { display: block; font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 5px; letter-spacing: .5px; text-transform: uppercase; }
+  input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 9px 11px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; color: var(--text); background: var(--white); transition: border-color .2s; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .btn { padding: 9px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: #68a619; }
+  .btn-navy { background: var(--navy); color: white; }
+  .btn-navy:hover { background: #344d5e; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-xlight); }
+  .btn-blue { background: var(--blue); color: white; }
+  .btn-blue:hover { background: #1860a0; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-danger { background: var(--red-light); color: var(--red); border: 1px solid #f5a0a0; }
+  .btn-danger:hover { background: var(--red); color: white; }
+
+  /* SIZE SELECTOR */
+  .size-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 4px; }
+  .size-opt { cursor: pointer; }
+  .size-opt input { display: none; }
+  .size-card {
+    border: 2px solid var(--border); border-radius: var(--radius); padding: 12px;
+    text-align: center; transition: all .2s; background: white;
+  }
+  .size-card:hover { border-color: var(--blue); }
+  .size-opt input:checked + .size-card { border-color: var(--green); background: var(--green-light); }
+  .size-card .sc-code { font-size: 20px; font-weight: 900; color: var(--navy); }
+  .size-card .sc-name { font-size: 12px; font-weight: 700; color: var(--navy); margin: 2px 0; }
+  .size-card .sc-audience { font-size: 10px; color: var(--muted); line-height: 1.3; }
+
+  /* DEBT TIER DISPLAY */
+  .debt-display { border-radius: var(--radius); padding: 12px 16px; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .debt-none     { background: var(--navy-xlight); color: var(--muted); border: 1.5px solid var(--border); }
+  .debt-low      { background: #f0f8e6; color: #3a6600; border: 1.5px solid var(--green); }
+  .debt-moderate { background: #eef5fd; color: #0d4a80; border: 1.5px solid var(--blue); }
+  .debt-high     { background: var(--orange-light); color: #7a3e00; border: 1.5px solid var(--orange); }
+  .debt-critical { background: var(--red-light); color: var(--red); border: 1.5px solid var(--red); }
+
+  /* PHASES TABLE */
+  .phases-table { width: 100%; border-collapse: collapse; }
+  .phases-table th { background: var(--navy); color: white; padding: 10px 12px; font-size: 12px; font-weight: 600; text-align: left; }
+  .phases-table th.num { text-align: center; }
+  .phases-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; }
+  .phases-table tr:last-child td { border-bottom: none; }
+  .phases-table tr:nth-child(even) td { background: var(--navy-xlight); }
+  .phase-name { font-weight: 600; color: var(--navy); }
+  .phase-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .range-cell { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .phase-input { width: 80px; padding: 6px 8px; text-align: center; font-size: 13px; font-weight: 700; border: 1.5px solid var(--border); border-radius: 6px; }
+  .phase-input:focus { outline: none; border-color: var(--blue); }
+  .notes-cell input { padding: 5px 8px; font-size: 11px; width: 100%; min-width: 120px; }
+  .total-row td { background: var(--navy) !important; color: white; font-weight: 700; font-size: 14px; }
+  .total-row td.total-val { color: var(--green); font-size: 18px; }
+
+  /* MULTIPLIERS */
+  .multiplier-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; border-radius: var(--radius); border: 1.5px solid var(--border); margin-bottom: 8px; transition: all .2s; }
+  .multiplier-row:has(input:checked) { border-color: var(--orange); background: var(--orange-light); }
+  .multiplier-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--orange); margin-top: 2px; flex-shrink: 0; cursor: pointer; }
+  .mult-info { flex: 1; }
+  .mult-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .mult-why { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .mult-pct { font-size: 13px; font-weight: 800; color: var(--orange); white-space: nowrap; }
+  .mult-hrs { font-size: 11px; color: var(--muted); text-align: right; margin-top: 2px; }
+
+  /* TOTALS SUMMARY */
+  .totals-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
+  .total-item { background: var(--navy-xlight); border-radius: var(--radius); padding: 14px 16px; }
+  .total-item .ti-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+  .total-item .ti-val { font-size: 24px; font-weight: 900; color: var(--navy); margin-top: 4px; }
+  .total-item .ti-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .total-item.highlight { background: var(--navy); }
+  .total-item.highlight .ti-label { color: rgba(255,255,255,.6); }
+  .total-item.highlight .ti-val { color: var(--green); }
+  .total-item.highlight .ti-sub { color: rgba(255,255,255,.4); }
+
+  /* CALENDAR */
+  .cal-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .cal-input { display: flex; align-items: center; gap: 8px; }
+  .cal-input label { margin-bottom: 0; white-space: nowrap; }
+  .cal-input input { width: 70px; }
+  .cal-result { font-size: 13px; color: var(--muted); }
+  .cal-result strong { color: var(--navy); font-size: 15px; }
+
+  /* SCOPE CARD */
+  .scope-card { background: white; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 28px; margin-top: 20px; display: none; }
+  .scope-card.visible { display: block; }
+  .sc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 3px solid var(--navy); }
+  .sc-title { font-size: 20px; font-weight: 800; color: var(--navy); }
+  .sc-subtitle { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .sc-badge { font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 8px; background: var(--green-light); color: #3a6600; border: 2px solid var(--green); }
+  .sc-meta-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+  .sc-meta-item { background: var(--navy-xlight); border-radius: var(--radius); padding: 10px 12px; }
+  .sc-meta-item .sm-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+  .sc-meta-item .sm-val { font-size: 14px; font-weight: 800; color: var(--navy); margin-top: 2px; }
+  .sc-phases-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
+  .sc-phases-table th { background: var(--navy); color: white; padding: 8px 10px; font-weight: 600; text-align: left; }
+  .sc-phases-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  .sc-phases-table tr:nth-child(even) td { background: var(--navy-xlight); }
+  .sc-multipliers { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .sc-multipliers strong { color: var(--navy); }
+  .sc-footer { font-size: 11px; color: var(--muted); text-align: center; border-top: 1px solid var(--border); padding-top: 12px; }
+
+  .actions-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .empty-state { text-align: center; padding: 32px 20px; color: var(--muted); }
+  .archive-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 8px; }
+  .archive-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .archive-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .archive-actions { display: flex; gap: 6px; }
+
+  @media print {
+    header, .page-hero, .card:not(.scope-card), .actions-row, .handoff-banner { display: none !important; }
+    .scope-card { display: block !important; border: none; padding: 0; }
+    body { background: white; }
+    .main { padding: 0; max-width: 100%; }
+  }
+  @media (max-width: 700px) {
+    .size-grid { grid-template-columns: 1fr 1fr; }
+    .form-row, .form-row-3, .totals-grid, .sc-meta-grid { grid-template-columns: 1fr; }
+    header, .page-hero { padding-left: 16px; padding-right: 16px; }
+    .main { padding: 20px 16px 48px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="header-logo">ID</div>
+    <div class="header-title"><span>ID Toolkit</span></div>
+  </div>
+  <a href="index.html" class="back-link">← All Tools</a>
+</header>
+
+<div class="page-hero">
+  <h1>📋 Program Planner</h1>
+  <p>Estimate hours for program-level overhauls. Use after completing a Content Debt Audit. Results can be shared as a Scope Card with stakeholders.</p>
+</div>
+
+<div class="main">
+
+  <!-- HANDOFF BANNER (shown when arriving from audit) -->
+  <div class="handoff-banner" id="handoffBanner" style="display:none">
+    <div class="hb-text">
+      <strong>📥 Audit data loaded from Content Debt Audit</strong>
+      <span id="handoffDetail"></span>
+    </div>
+    <button class="hb-dismiss" onclick="document.getElementById('handoffBanner').style.display='none'">Dismiss</button>
+  </div>
+
+  <!-- SETUP -->
+  <div class="card">
+    <div class="card-header"><h2>📋 Program Setup</h2></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="field">
+          <label>Program Name</label>
+          <input type="text" id="programName" placeholder="e.g., Meters | Entry-Level" />
+        </div>
+        <div class="field">
+          <label>Assigned Designer(s)</label>
+          <input type="text" id="designers" placeholder="e.g., Averi Riggott" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Content Debt Tier (from Audit)</label>
+        <select id="debtTier" onchange="onDebtChange()">
+          <option value="">— Select or run audit first —</option>
+          <option value="low">🟢 LOW DEBT (72–90)</option>
+          <option value="moderate">🔵 MODERATE DEBT (52–71)</option>
+          <option value="high">🟠 HIGH DEBT (29–51)</option>
+          <option value="critical">🔴 CRITICAL DEBT (0–28)</option>
+        </select>
+        <div class="debt-display debt-none" id="debtDisplay" style="margin-top:8px">Select a debt tier above or <a href="content-debt-audit.html" style="color:var(--blue);font-weight:700">run the Content Debt Audit →</a></div>
+      </div>
+
+      <div class="field">
+        <label>Program Size</label>
+        <div class="size-grid">
+          <label class="size-opt"><input type="radio" name="progSize" value="small" onchange="updateRanges()" /><div class="size-card"><div class="sc-code">S</div><div class="sc-name">Small</div><div class="sc-audience">1–2 weeks · Single team or dept · Straightforward modality mix</div></div></label>
+          <label class="size-opt"><input type="radio" name="progSize" value="medium" onchange="updateRanges()" /><div class="size-card"><div class="sc-code">M</div><div class="sc-name">Medium</div><div class="sc-audience">3–5 weeks · Multi-role or multi-team · Defined trainer relationship</div></div></label>
+          <label class="size-opt"><input type="radio" name="progSize" value="large" onchange="updateRanges()" /><div class="size-card"><div class="sc-code">L</div><div class="sc-name">Large</div><div class="sc-audience">6–9 weeks · Job-title-wide · Dedicated trainer · Phased delivery likely. Includes connected program series.</div></div></label>
+          <label class="size-opt"><input type="radio" name="progSize" value="enterprise" onchange="updateRanges()" /><div class="size-card"><div class="sc-code">E</div><div class="sc-name">Enterprise</div><div class="sc-audience">Any length · Cross-departmental · Multiple SME owners · Complexity defined by breadth, not duration</div></div></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE HOURS -->
+  <div class="card">
+    <div class="card-header"><h2>⏱️ Phase Hour Estimates</h2><span style="color:rgba(255,255,255,.5);font-size:12px">Enter your estimate for each active phase</span></div>
+    <div class="card-body" style="padding:0">
+      <div style="overflow-x:auto">
+        <table class="phases-table">
+          <thead><tr>
+            <th>Phase</th>
+            <th class="num">Range (hrs)</th>
+            <th class="num">Your Estimate</th>
+            <th>Notes / Assumptions</th>
+          </tr></thead>
+          <tbody id="phasesBody"></tbody>
+          <tfoot><tr class="total-row">
+            <td colspan="2">BASE TOTAL HOURS</td>
+            <td class="num total-val" id="baseTotal">0</td>
+            <td style="color:rgba(255,255,255,.6);font-size:12px">Sum of estimates above</td>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTIPLIERS -->
+  <div class="card">
+    <div class="card-header"><h2>✖️ Multipliers</h2><span style="color:rgba(255,255,255,.5);font-size:12px">Check all that apply</span></div>
+    <div class="card-body" id="multipliersBody"></div>
+  </div>
+
+  <!-- TOTALS -->
+  <div class="card">
+    <div class="card-header"><h2>📊 Summary</h2></div>
+    <div class="card-body">
+      <div class="totals-grid">
+        <div class="total-item"><div class="ti-label">Base Hours</div><div class="ti-val" id="sumBase">0</div><div class="ti-sub">Before multipliers</div></div>
+        <div class="total-item"><div class="ti-label">Multiplier Hours Added</div><div class="ti-val" id="sumMult">+0</div><div class="ti-sub">From checked conditions</div></div>
+        <div class="total-item highlight"><div class="ti-label">Total Adjusted Hours</div><div class="ti-val" id="sumTotal">0</div><div class="ti-sub">Use for stakeholder conversations</div></div>
+      </div>
+
+      <!-- CALENDAR CONVERSION -->
+      <div style="background:var(--navy-xlight);border-radius:var(--radius);padding:14px 16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">📅 Calendar Conversion</div>
+        <div class="cal-row">
+          <div class="cal-input">
+            <label>Productive hrs/day</label>
+            <input type="number" id="hrsPerDay" value="5" min="1" max="8" step=".5" onchange="updateCalendar()" />
+          </div>
+          <div class="cal-result">
+            Solo: <strong id="calSolo">—</strong> business days &nbsp;|&nbsp;
+            With 20% other load: <strong id="calShared">—</strong> days (<strong id="calWeeks">—</strong> weeks)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions-row">
+    <button class="btn btn-green" onclick="generateScopeCard()">📄 Generate Scope Card</button>
+    <button class="btn btn-navy" onclick="window.print()">🖨️ Print Scope Card</button>
+    <button class="btn btn-blue" onclick="savePlanner()">💾 Save Estimate</button>
+    <button class="btn btn-ghost" onclick="clearPlanner()">↺ Clear</button>
+  </div>
+
+  <!-- SCOPE CARD -->
+  <div class="scope-card" id="scopeCard">
+    <div class="sc-header">
+      <div>
+        <div class="sc-title" id="sc-name">Program Name</div>
+        <div class="sc-subtitle">Program Hour Estimate · ID Toolkit</div>
+      </div>
+      <div class="sc-badge" id="sc-badge">—</div>
+    </div>
+    <div class="sc-meta-grid">
+      <div class="sc-meta-item"><div class="sm-label">Designer(s)</div><div class="sm-val" id="sc-designers">—</div></div>
+      <div class="sc-meta-item"><div class="sm-label">Program Size</div><div class="sm-val" id="sc-size">—</div></div>
+      <div class="sc-meta-item"><div class="sm-label">Content Debt Tier</div><div class="sm-val" id="sc-debt">—</div></div>
+      <div class="sc-meta-item"><div class="sm-label">Date</div><div class="sm-val" id="sc-date">—</div></div>
+    </div>
+    <table class="sc-phases-table">
+      <thead><tr><th>Phase</th><th>Range</th><th>Estimate (hrs)</th><th>Notes</th></tr></thead>
+      <tbody id="sc-phases"></tbody>
+      <tfoot><tr style="background:var(--navy);color:white">
+        <td colspan="2" style="padding:8px 10px;font-weight:700">BASE TOTAL</td>
+        <td style="padding:8px 10px;font-weight:800;color:var(--green);font-size:15px" id="sc-base">—</td>
+        <td></td>
+      </tr></tfoot>
+    </table>
+    <div class="sc-multipliers" id="sc-mults"></div>
+    <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="flex:1;background:var(--navy-xlight);border-radius:var(--radius);padding:12px 14px;min-width:120px">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Total Adjusted Hours</div>
+        <div style="font-size:22px;font-weight:900;color:var(--navy);margin-top:4px" id="sc-total">—</div>
+      </div>
+      <div style="flex:1;background:var(--navy-xlight);border-radius:var(--radius);padding:12px 14px;min-width:120px">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Est. Calendar Time</div>
+        <div style="font-size:22px;font-weight:900;color:var(--navy);margin-top:4px" id="sc-cal">—</div>
+        <div style="font-size:11px;color:var(--muted)" id="sc-cal-sub">—</div>
+      </div>
+    </div>
+    <div class="sc-footer">Generated by ID Toolkit · Program Planner · These are build hours only and do not include designer capacity for concurrent projects.</div>
+  </div>
+
+  <!-- SAVED ESTIMATES -->
+  <div class="card" style="margin-top:20px">
+    <div class="card-header"><h2>🗄️ Saved Estimates</h2></div>
+    <div class="card-body" id="savedEstimates">
+      <div class="empty-state"><p>No saved estimates yet.</p></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── PHASE DATA ────────────────────────────────────────────────────────────
+const PHASES = [
+  { id:'audit',    name:'Content Debt Audit',           desc:'Inventory existing assets, assess quality, gap analysis', ranges:{small:[8,16],medium:[16,24],large:[24,40],enterprise:[32,48]}, note:'Do this first. Hours here save 3x later.' },
+  { id:'arch',     name:'Program Architecture',          desc:'Curriculum map, learning journey, modality decisions',    ranges:{small:[6,15],medium:[15,30],large:[30,60],enterprise:[40,80]}, note:'Non-negotiable phase. Do not rush this.' },
+  { id:'sme',      name:'Stakeholder & SME Alignment',  desc:'Needs analysis, action mapping, SME briefing, DM approval', ranges:{small:[8,16],medium:[16,28],large:[24,40],enterprise:[40,64]}, note:'SME availability is your biggest wildcard.' },
+  { id:'facguide', name:'Facilitator Guide Build',       desc:'Full scripted facilitator guide, session plans, slide-by-slide notes, activities, debrief scripts', ranges:{small:[20,40],medium:[40,80],large:[80,140],enterprise:[100,160]}, note:'Most underscoped phase. Full scripted guides take real time.' },
+  { id:'participant', name:'Participant Material Build', desc:'Workbook, curriculum package, job aids, reference set',   ranges:{small:[10,20],medium:[20,40],large:[48,100],enterprise:[24,48]}, note:'Add 30% if first digital curriculum package.' },
+  { id:'elearning', name:'eLearning Development',        desc:'Rise / Storyline modules, simulations, video (use Project Estimator for per-module hours, sum and enter here)', ranges:{small:[40,80],medium:[80,160],large:[160,300],enterprise:[80,160]}, note:'Every program has daily eLearning at minimum. Sum per-module estimates from Project Estimator.' },
+  { id:'ojt',      name:'OJT / Embedded Training Design', desc:'Designed practice in live systems with trainer observing — not shadowing. Includes practice guides, system walkthroughs, supervisor checkpoints, and sign-off criteria', ranges:{small:[0,8],medium:[10,20],large:[24,48],enterprise:[32,60]}, note:'Only if OJT is a designed component with structured observation and sign-off.' },
+  { id:'trainer',  name:'Trainer Alignment & Prep',      desc:'Train-the-trainer, facilitator certification, co-design review, rehearsal sessions', ranges:{small:[8,16],medium:[16,28],large:[32,60],enterprise:[16,32]}, note:'Never skip this. Trainer blindside at pilot is a known risk.' },
+  { id:'pilot',    name:'Pilot Delivery & Debrief',      desc:'First live delivery, observation, structured debrief, consolidated feedback list', ranges:{small:[8,16],medium:[12,20],large:[20,32],enterprise:[24,40]}, note:'Non-negotiable for Medium and above. Required gate before Launch.' },
+  { id:'revision', name:'Revision Cycle (Post-Pilot)',   desc:'Incorporating pilot feedback, SME re-review, final approval', ranges:{small:[12,24],medium:[16,28],large:[20,36],enterprise:[28,48]}, note:'Short programs often have heavier post-pilot revision. Budget accordingly.' },
+  { id:'lms',      name:'LMS Setup & Launch',            desc:'Course setup, testing, notifications, learning plans, enrollment rules, launch comms', ranges:{small:[3,5],medium:[5,11],large:[11,22],enterprise:[22,43]}, note:'Complexity scales with number of learning objects and enrollment rules.' },
+  { id:'pm',       name:'Project Management Overhead',   desc:'Stakeholder comms, Monday board, weekly updates, DM approval cycles, scope management', ranges:{small:[8,16],medium:[16,28],large:[24,40],enterprise:[32,56]}, note:'Real cost. Scales with number of stakeholders and cross-departmental complexity.' },
+];
+
+const MULTIPLIERS = [
+  { id:'critical', label:'Critical Content Debt (score 0–28)',       pct:.50, why:'Effectively a new build. Don\'t let "update" language stick.' },
+  { id:'highdebt', label:'High Content Debt (score 29–51)',           pct:.30, why:'Major reconstruction. Reframe scope with stakeholders before starting.' },
+  { id:'trainer',  label:'Dedicated Trainer / TTT Required',          pct:.175, why:'Trainer alignment, rehearsal, TTT, and facilitation design add significant hours.' },
+  { id:'ojt',      label:'Ops-Embedded Trainer / OJT Integration',    pct:.25, why:'Designing around live operations requires iteration, field testing, and supervisor coordination.' },
+  { id:'digital',  label:'New Digital Curriculum Package (1st build)',pct:.25, why:'First-time NotebookLM / Google Keep build has architecture overhead.' },
+  { id:'newtool',  label:'New Tool for Team',                         pct:.30, why:'Per your complexity rubric. Learning curve is real.' },
+  { id:'rush',     label:'Compressed Timeline (<50% standard)',        pct:.25, why:'Rush doesn\'t reduce hours — it concentrates risk and increases errors.' },
+  { id:'exec',     label:'Executive Visibility / High Review Rounds', pct:.175, why:'Approval cycles, presentation prep, and revision loops add overhead.' },
+];
+
+const STORE_PLANS = 'idt_plans_v1';
+let savedPlans = loadPlans();
+function loadPlans() { try { return JSON.parse(localStorage.getItem(STORE_PLANS)) || []; } catch { return []; } }
+function savePlans() { try { localStorage.setItem(STORE_PLANS, JSON.stringify(savedPlans)); } catch(e) { console.warn(e); } }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ─── INIT: CHECK FOR HANDOFF ───────────────────────────────────────────────
+function checkHandoff() {
+  let data = null;
+  // URL params first
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('program')) {
+    data = { programName: params.get('program'), tierLabel: params.get('tier'), score: params.get('score'), auditedBy: params.get('auditor') };
+  }
+  // localStorage override
+  try {
+    const ls = localStorage.getItem('idt_audit_handoff');
+    if (ls) { data = JSON.parse(ls); localStorage.removeItem('idt_audit_handoff'); }
+  } catch(e) {}
+
+  if (!data) return;
+
+  document.getElementById('programName').value = data.programName || '';
+  if (data.auditedBy) document.getElementById('designers').value = data.auditedBy;
+
+  // Map tier label to select value
+  const tl = (data.tierLabel || '').toLowerCase();
+  if (tl.includes('low')) setDebt('low');
+  else if (tl.includes('moderate')) setDebt('moderate');
+  else if (tl.includes('high') && !tl.includes('critical')) setDebt('high');
+  else if (tl.includes('critical')) setDebt('critical');
+
+  const banner = document.getElementById('handoffBanner');
+  banner.style.display = 'flex';
+  document.getElementById('handoffDetail').textContent =
+    `${data.programName} · ${data.tierLabel || ''} · Score: ${data.score || '—'}/90`;
+}
+
+function setDebt(val) {
+  document.getElementById('debtTier').value = val;
+  onDebtChange();
+  // Auto-check relevant multipliers
+  if (val === 'critical') document.getElementById('chk_critical').checked = true;
+  else if (val === 'high') document.getElementById('chk_highdebt').checked = true;
+  updateTotals();
+}
+
+// ─── DEBT DISPLAY ──────────────────────────────────────────────────────────
+const DEBT_INFO = {
+  '':         { cls:'debt-none',     text:'Select a debt tier above or run the Content Debt Audit →', link:true },
+  low:        { cls:'debt-low',      text:'🟢 LOW DEBT — Materials mostly current and complete. Standard update project. Hours: Moderate.' },
+  moderate:   { cls:'debt-moderate', text:'🔵 MODERATE DEBT — Gaps exist. Some sections need rebuild. Plan for extended revision cycles. Hours: Significant.' },
+  high:       { cls:'debt-high',     text:'🟠 HIGH DEBT — Majority needs rebuild. Score as new build in complexity intake. Hours: High.' },
+  critical:   { cls:'debt-critical', text:'🔴 CRITICAL DEBT — Effectively greenfield. Do not present as update to stakeholders. Hours: Greenfield.' },
+};
+
+function onDebtChange() {
+  const val = document.getElementById('debtTier').value;
+  const info = DEBT_INFO[val] || DEBT_INFO[''];
+  const el = document.getElementById('debtDisplay');
+  el.className = 'debt-display ' + info.cls;
+  el.innerHTML = info.link
+    ? `Select a debt tier above or <a href="content-debt-audit.html" style="color:var(--blue);font-weight:700">run the Content Debt Audit →</a>`
+    : info.text;
+}
+
+// ─── PHASES TABLE ──────────────────────────────────────────────────────────
+function buildPhasesTable() {
+  const body = document.getElementById('phasesBody');
+  body.innerHTML = PHASES.map(p => `
+    <tr>
+      <td>
+        <div class="phase-name">${p.name}</div>
+        <div class="phase-desc">${p.desc}</div>
+        ${p.note ? `<div class="phase-desc" style="color:var(--orange);margin-top:2px">⚠ ${p.note}</div>` : ''}
+      </td>
+      <td class="num range-cell" id="range_${p.id}">—</td>
+      <td class="num"><input class="phase-input" type="number" id="hrs_${p.id}" min="0" step="1" placeholder="0" onchange="updateTotals()" /></td>
+      <td class="notes-cell"><input type="text" id="pnotes_${p.id}" placeholder="Assumptions..." /></td>
+    </tr>
+  `).join('');
+}
+
+function updateRanges() {
+  const size = document.querySelector('input[name="progSize"]:checked')?.value;
+  PHASES.forEach(p => {
+    const el = document.getElementById('range_' + p.id);
+    if (!el) return;
+    if (size && p.ranges[size]) {
+      const [lo, hi] = p.ranges[size];
+      el.textContent = lo === hi && lo === 0 ? 'N/A' : `${lo}–${hi}`;
+    } else {
+      el.textContent = '—';
+    }
+  });
+  updateTotals();
+}
+
+// ─── MULTIPLIERS ───────────────────────────────────────────────────────────
+function buildMultipliers() {
+  const body = document.getElementById('multipliersBody');
+  body.innerHTML = MULTIPLIERS.map(m => `
+    <div class="multiplier-row">
+      <input type="checkbox" id="chk_${m.id}" onchange="updateTotals()" />
+      <div class="mult-info">
+        <div class="mult-name">${m.label}</div>
+        <div class="mult-why">${m.why}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="mult-pct">+${Math.round(m.pct*100)}%</div>
+        <div class="mult-hrs" id="multhrs_${m.id}">+0 hrs</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── TOTALS ────────────────────────────────────────────────────────────────
+function updateTotals() {
+  const base = PHASES.reduce((s,p) => s + (parseFloat(document.getElementById('hrs_'+p.id)?.value)||0), 0);
+  let multHrs = 0;
+  MULTIPLIERS.forEach(m => {
+    const checked = document.getElementById('chk_'+m.id)?.checked;
+    const added = checked ? Math.round(base * m.pct) : 0;
+    multHrs += added;
+    const el = document.getElementById('multhrs_'+m.id);
+    if (el) el.textContent = `+${added} hrs`;
+  });
+  const total = base + multHrs;
+  document.getElementById('baseTotal').textContent = base;
+  document.getElementById('sumBase').textContent = base;
+  document.getElementById('sumMult').textContent = '+' + multHrs;
+  document.getElementById('sumTotal').textContent = total;
+  updateCalendar();
+}
+
+function updateCalendar() {
+  const total = parseFloat(document.getElementById('sumTotal').textContent) || 0;
+  const hpd = parseFloat(document.getElementById('hrsPerDay').value) || 5;
+  if (!total) { document.getElementById('calSolo').textContent = '—'; document.getElementById('calShared').textContent = '—'; document.getElementById('calWeeks').textContent = '—'; return; }
+  const solo = Math.ceil(total / hpd);
+  const shared = Math.ceil(total / (hpd * 0.8));
+  const weeks = Math.ceil(shared / 5);
+  document.getElementById('calSolo').textContent = solo;
+  document.getElementById('calShared').textContent = shared;
+  document.getElementById('calWeeks').textContent = weeks;
+}
+
+// ─── SCOPE CARD ────────────────────────────────────────────────────────────
+function generateScopeCard() {
+  const name = document.getElementById('programName').value || 'Untitled Program';
+  const designers = document.getElementById('designers').value || '—';
+  const size = document.querySelector('input[name="progSize"]:checked')?.value;
+  const sizeLabel = size ? {small:'Small (S)',medium:'Medium (M)',large:'Large (L)',enterprise:'Enterprise (E)'}[size] : '—';
+  const debt = document.getElementById('debtTier').value;
+  const debtLabel = {low:'🟢 Low Debt',moderate:'🔵 Moderate Debt',high:'🟠 High Debt',critical:'🔴 Critical Debt'}[debt] || '—';
+  const base = parseInt(document.getElementById('sumBase').textContent) || 0;
+  const total = parseInt(document.getElementById('sumTotal').textContent) || 0;
+  const hpd = parseFloat(document.getElementById('hrsPerDay').value) || 5;
+  const shared = Math.ceil(total / (hpd * 0.8));
+  const weeks = Math.ceil(shared / 5);
+
+  document.getElementById('sc-name').textContent = name;
+  document.getElementById('sc-badge').textContent = `${total} hrs total`;
+  document.getElementById('sc-designers').textContent = designers;
+  document.getElementById('sc-size').textContent = sizeLabel;
+  document.getElementById('sc-debt').textContent = debtLabel;
+  document.getElementById('sc-date').textContent = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('sc-base').textContent = base + ' hrs';
+  document.getElementById('sc-total').textContent = total + ' hrs';
+  document.getElementById('sc-cal').textContent = `~${weeks} weeks`;
+  document.getElementById('sc-cal-sub').textContent = `${shared} business days (with 20% other load)`;
+
+  const phaseRows = PHASES.map(p => {
+    const hrs = parseFloat(document.getElementById('hrs_'+p.id)?.value)||0;
+    if (!hrs) return '';
+    const range = document.getElementById('range_'+p.id)?.textContent || '—';
+    const notes = document.getElementById('pnotes_'+p.id)?.value || '';
+    return `<tr><td>${p.name}</td><td>${range}</td><td style="font-weight:700">${hrs}</td><td style="color:#6b7f8c">${notes}</td></tr>`;
+  }).join('');
+  document.getElementById('sc-phases').innerHTML = phaseRows || '<tr><td colspan="4" style="color:#6b7f8c;text-align:center">No phase hours entered</td></tr>';
+
+  const activeMults = MULTIPLIERS.filter(m => document.getElementById('chk_'+m.id)?.checked);
+  const multBase = parseInt(document.getElementById('sumBase').textContent)||0;
+  document.getElementById('sc-mults').innerHTML = activeMults.length
+    ? `<strong>Multipliers applied:</strong> ` + activeMults.map(m=>`${m.label} (+${Math.round(m.pct*100)}%, +${Math.round(multBase*m.pct)} hrs)`).join(' · ')
+    : '<em>No multipliers applied.</em>';
+
+  document.getElementById('scopeCard').classList.add('visible');
+  document.getElementById('scopeCard').scrollIntoView({behavior:'smooth'});
+}
+
+// ─── SAVE / LOAD ───────────────────────────────────────────────────────────
+function collectData() {
+  const hrs = {}, notes = {};
+  PHASES.forEach(p => { hrs[p.id] = parseFloat(document.getElementById('hrs_'+p.id)?.value)||0; notes[p.id] = document.getElementById('pnotes_'+p.id)?.value||''; });
+  const mults = {};
+  MULTIPLIERS.forEach(m => { mults[m.id] = document.getElementById('chk_'+m.id)?.checked||false; });
+  return {
+    programName: document.getElementById('programName').value||'Untitled Program',
+    designers: document.getElementById('designers').value||'',
+    debtTier: document.getElementById('debtTier').value,
+    size: document.querySelector('input[name="progSize"]:checked')?.value||'',
+    hrs, notes, mults,
+    base: parseInt(document.getElementById('sumBase').textContent)||0,
+    total: parseInt(document.getElementById('sumTotal').textContent)||0,
+    savedAt: new Date().toISOString()
+  };
+}
+
+function savePlanner() {
+  const data = collectData();
+  const existing = savedPlans.findIndex(p => p.programName === data.programName);
+  if (existing >= 0) {
+    if (!confirm(`An estimate for "${data.programName}" already exists. Replace it?`)) return;
+    data.id = savedPlans[existing].id;
+    savedPlans[existing] = data;
+  } else {
+    data.id = uid();
+    savedPlans.unshift(data);
+  }
+  savePlans();
+  renderSavedEstimates();
+  alert(`Estimate for "${data.programName}" saved!`);
+}
+
+function loadPlan(id) {
+  const p = savedPlans.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('programName').value = p.programName;
+  document.getElementById('designers').value = p.designers;
+  document.getElementById('debtTier').value = p.debtTier;
+  onDebtChange();
+  if (p.size) { const r = document.querySelector(`input[name="progSize"][value="${p.size}"]`); if(r) { r.checked=true; updateRanges(); } }
+  PHASES.forEach(ph => {
+    const el = document.getElementById('hrs_'+ph.id); if(el) el.value = p.hrs[ph.id]||'';
+    const n = document.getElementById('pnotes_'+ph.id); if(n) n.value = p.notes[ph.id]||'';
+  });
+  MULTIPLIERS.forEach(m => { const el = document.getElementById('chk_'+m.id); if(el) el.checked = p.mults[m.id]||false; });
+  updateTotals();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function deletePlan(id) {
+  if (!confirm('Delete this saved estimate?')) return;
+  savedPlans = savedPlans.filter(p => p.id !== id);
+  savePlans();
+  renderSavedEstimates();
+}
+
+function renderSavedEstimates() {
+  const el = document.getElementById('savedEstimates');
+  if (!savedPlans.length) { el.innerHTML = `<div class="empty-state"><p>No saved estimates yet.</p></div>`; return; }
+  el.innerHTML = savedPlans.map(p => `
+    <div class="archive-item">
+      <div>
+        <div class="archive-name">${escHTML(p.programName)}</div>
+        <div class="archive-meta">${p.total} hrs total &nbsp;·&nbsp; ${p.size ? p.size.charAt(0).toUpperCase()+p.size.slice(1) : '—'} &nbsp;·&nbsp; Saved ${new Date(p.savedAt).toLocaleDateString()}</div>
+      </div>
+      <div class="archive-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadPlan('${p.id}')">Load</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePlan('${p.id}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function clearPlanner() {
+  if (!confirm('Clear all fields and start over?')) return;
+  document.getElementById('programName').value = '';
+  document.getElementById('designers').value = '';
+  document.getElementById('debtTier').value = '';
+  onDebtChange();
+  document.querySelectorAll('input[name="progSize"]').forEach(r => r.checked = false);
+  PHASES.forEach(p => { const e=document.getElementById('hrs_'+p.id); if(e) e.value=''; const n=document.getElementById('pnotes_'+p.id); if(n) n.value=''; document.getElementById('range_'+p.id).textContent='—'; });
+  MULTIPLIERS.forEach(m => { const e=document.getElementById('chk_'+m.id); if(e) e.checked=false; });
+  updateTotals();
+  document.getElementById('scopeCard').classList.remove('visible');
+}
+
+function escHTML(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Init
+buildPhasesTable();
+buildMultipliers();
+renderSavedEstimates();
+checkHandoff();
+</script>
+</body>
+</html>
