@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Estimator | ID Toolkit</title>
+<style>
+  :root {
+    --navy: #263746; --green: #77BC1F; --blue: #2172B7; --orange: #FF8300; --red: #d63b3b;
+    --navy-xlight: #eef1f4; --green-light: #f0f8e6; --orange-light: #fff4e6; --red-light: #fdf0f0; --blue-light: #eef5fd;
+    --text: #1a2730; --muted: #6b7f8c; --border: #d0dbe3; --white: #ffffff;
+    --radius: 8px; --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Roboto','Segoe UI',sans-serif; background: var(--navy-xlight); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--navy); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 36px; height: 36px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: white; }
+  .header-title { color: white; font-size: 15px; font-weight: 500; opacity: .85; }
+  .header-title span { color: var(--green); font-weight: 700; opacity: 1; }
+  .back-link { color: var(--border); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+  .back-link:hover { color: white; }
+
+  .page-hero { background: var(--navy); padding: 28px 32px 36px; border-bottom: 4px solid var(--green); }
+  .page-hero h1 { color: white; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .page-hero p { color: rgba(255,255,255,.6); font-size: 14px; max-width: 560px; }
+
+  .main { max-width: 980px; margin: 0 auto; padding: 28px 24px 64px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+  .card { background: var(--white); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+  .card-header { background: var(--navy); padding: 13px 20px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .card-header h2 { color: white; font-size: 14px; font-weight: 600; }
+  .card-body { padding: 20px; }
+  .card-full { grid-column: 1 / -1; }
+
+  label { display: block; font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 5px; letter-spacing: .5px; text-transform: uppercase; }
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%; padding: 9px 11px; border: 1.5px solid var(--border); border-radius: var(--radius);
+    font-size: 13px; font-family: inherit; color: var(--text); background: var(--white); transition: border-color .2s;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .btn { padding: 9px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: #68a619; }
+  .btn-navy { background: var(--navy); color: white; }
+  .btn-navy:hover { background: #344d5e; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-xlight); }
+  .btn-danger { background: var(--red-light); color: var(--red); border: 1px solid #f5a0a0; }
+  .btn-danger:hover { background: var(--red); color: white; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-full { width: 100%; justify-content: center; padding: 13px; font-size: 14px; }
+
+  /* COMPLEXITY TIERS */
+  .tier-ref { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tier-chip { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: default; }
+  .tc-cd  { background: #f0f8e6; color: #3a6600; border: 1px solid #b7df7a; }
+  .tc-jr  { background: var(--blue-light); color: #0d4a80; border: 1px solid #a8cef0; }
+  .tc-id  { background: var(--orange-light); color: #7a3e00; border: 1px solid #ffd199; }
+  .tc-sr  { background: var(--red-light); color: var(--red); border: 1px solid #f5a0a0; }
+  .tc-ent { background: #f3e8f8; color: #5a1a6b; border: 1px solid #d4a8e8; }
+
+  /* DELIVERABLE ROWS */
+  .deliverable-item { border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; transition: border-color .2s; }
+  .deliverable-item:hover { border-color: var(--blue); }
+  .del-header { background: var(--navy-xlight); padding: 10px 14px; display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 10px; }
+  .del-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .del-range { font-size: 12px; color: var(--muted); }
+  .del-pts { font-size: 12px; font-weight: 700; color: var(--navy); background: var(--green-light); border: 1px solid #b7df7a; padding: 2px 8px; border-radius: 4px; }
+  .del-body { padding: 12px 14px; background: white; display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; }
+  .empty-state { text-align: center; padding: 36px 20px; color: var(--muted); }
+  .empty-state .ei { font-size: 36px; margin-bottom: 10px; }
+
+  /* TIME FACTORS */
+  .factor-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; border-radius: var(--radius); border: 1.5px solid var(--border); margin-bottom: 6px; transition: all .2s; }
+  .factor-row:has(input:checked) { border-color: var(--orange); background: var(--orange-light); }
+  .factor-row input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--orange); margin-top: 2px; flex-shrink: 0; cursor: pointer; }
+  .factor-info { flex: 1; }
+  .factor-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .factor-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .factor-pct { font-size: 12px; font-weight: 800; color: var(--orange); white-space: nowrap; }
+
+  /* LIVE TOTALS BAR */
+  .totals-bar { position: sticky; top: 0; z-index: 10; background: var(--navy); padding: 12px 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+  .tb-item .tv { font-size: 22px; font-weight: 900; color: var(--green); }
+  .tb-item .tl { font-size: 11px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .4px; }
+  .tb-divider { width: 1px; height: 32px; background: rgba(255,255,255,.15); }
+
+  /* SCOPE CARD */
+  .scope-card { display: none; background: white; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 28px; margin-top: 20px; }
+  .scope-card.visible { display: block; }
+  .sc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 3px solid var(--navy); }
+  .sc-title { font-size: 20px; font-weight: 800; color: var(--navy); }
+  .sc-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .sc-badge { font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 8px; background: var(--green-light); color: #3a6600; border: 2px solid var(--green); }
+  .sc-meta { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 20px; }
+  .sc-meta-item { background: var(--navy-xlight); border-radius: var(--radius); padding: 10px 12px; }
+  .sc-meta-item .sml { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+  .sc-meta-item .smv { font-size: 14px; font-weight: 800; color: var(--navy); margin-top: 2px; }
+  .sc-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
+  .sc-table th { background: var(--navy); color: white; padding: 8px 10px; font-weight: 600; text-align: left; }
+  .sc-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  .sc-table tr:nth-child(even) td { background: var(--navy-xlight); }
+  .sc-totals { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+  .sc-total-item { background: var(--navy-xlight); border-radius: var(--radius); padding: 12px 14px; flex: 1; min-width: 100px; }
+  .sc-total-item.highlight { background: var(--navy); }
+  .sc-total-item .stl { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+  .sc-total-item.highlight .stl { color: rgba(255,255,255,.5); }
+  .sc-total-item .stv { font-size: 22px; font-weight: 900; color: var(--navy); margin-top: 2px; }
+  .sc-total-item.highlight .stv { color: var(--green); }
+  .sc-footer { font-size: 11px; color: var(--muted); text-align: center; border-top: 1px solid var(--border); padding-top: 12px; }
+  .sc-factors { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .sc-factors strong { color: var(--navy); }
+
+  .actions-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+  @media print {
+    header, .page-hero, .card:not(.scope-card), .actions-row, .btn { display: none !important; }
+    .scope-card { display: block !important; border: none; padding: 0; }
+    .main { padding: 0; max-width: 100%; display: block; }
+    body { background: white; }
+  }
+  @media (max-width: 680px) {
+    .main { grid-template-columns: 1fr; }
+    .sc-meta { grid-template-columns: 1fr 1fr; }
+    header, .page-hero { padding-left: 16px; padding-right: 16px; }
+    .main { padding: 16px 16px 48px; }
+    .del-body { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="header-logo">ID</div>
+    <div class="header-title"><span>ID Toolkit</span></div>
+  </div>
+  <a href="index.html" class="back-link">← All Tools</a>
+</header>
+
+<div class="page-hero">
+  <h1>🧮 Project Estimator</h1>
+  <p>Build your deliverable stack, apply time factors, and generate a Scope Card ready to drop into your project proposal.</p>
+</div>
+
+<div class="main">
+
+  <!-- LEFT: PROJECT SETUP -->
+  <div>
+    <div class="card">
+      <div class="card-header"><h2>📋 Project Setup</h2></div>
+      <div class="card-body">
+
+        <div class="field">
+          <label>Project Name</label>
+          <input type="text" id="projectName" placeholder="e.g., New Hire Security Awareness" />
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Priority Tier</label>
+            <select id="projectPriority">
+              <option value="p1">P1 — Critical</option>
+              <option value="p2">P2 — High</option>
+              <option value="p3" selected>P3 — Standard</option>
+              <option value="p4">P4 — Low</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Target Completion Date</label>
+            <input type="date" id="completionDate" onchange="updateAvailableHours()" />
+          </div>
+        </div>
+        <div class="field">
+          <label>NA Meeting Date</label>
+          <input type="date" id="naDate" onchange="updateAvailableHours()" />
+        </div>
+        <div class="field">
+          <label>Complexity Score</label>
+          <div class="tier-ref">
+            <span class="tier-chip tc-cd">CD 1–15</span>
+            <span class="tier-chip tc-jr">Jr. ID 16–27</span>
+            <span class="tier-chip tc-id">ID 28–43</span>
+            <span class="tier-chip tc-sr">Sr. ID 44–60</span>
+            <span class="tier-chip tc-ent">Enterprise 61+</span>
+          </div>
+          <input type="number" id="complexityScore" min="1" max="100" placeholder="e.g., 28" onchange="updateTierDisplay(); updateEstimates()" />
+          <div class="field-hint" id="tierDisplay">Enter your Designer Complexity Score. Use the Complexity &amp; Readiness Scorer (coming soon) for a consistent score.</div>
+        </div>
+        <div class="field">
+          <div style="background:var(--navy-xlight);border-radius:var(--radius);padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:12px;color:var(--muted);font-weight:600">Available Hours (NA → Completion)</div>
+            <div style="font-size:16px;font-weight:800;color:var(--navy)" id="availableHours">—</div>
+          </div>
+          <div class="field-hint">Based on 6 productive hrs/day. Update both dates to calculate.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIME FACTORS -->
+    <div class="card">
+      <div class="card-header"><h2>⏱️ Time Factors</h2><span style="color:rgba(255,255,255,.5);font-size:12px">Check all that apply</span></div>
+      <div class="card-body" id="factorList"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: DELIVERABLES -->
+  <div>
+    <div class="card">
+      <div class="card-header">
+        <h2>➕ Add Deliverable</h2>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Deliverable Name</label>
+          <input type="text" id="newDelName" placeholder="e.g., Rise 360 Course Build" />
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Modality Category</label>
+            <select id="newDelModality" onchange="onModalityChange()">
+              <option value="">— Select —</option>
+              <option value="elearning_rise">eLearning — Rise 360</option>
+              <option value="elearning_storyline">eLearning — Storyline</option>
+              <option value="video">Video Production</option>
+              <option value="ilt">ILT / Workshop Design</option>
+              <option value="jobaid">Job Aid / QRG / Infographic</option>
+              <option value="assessment">Assessment Design</option>
+              <option value="document">Document / SOP / KB Article</option>
+              <option value="facilitation">Facilitation Guide</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Quantity</label>
+            <input type="number" id="newDelQty" min="1" value="1" placeholder="1" />
+          </div>
+        </div>
+        <div class="field" id="videoDurationField" style="display:none">
+          <label>Video Duration (minutes each)</label>
+          <input type="number" id="newDelVideoDuration" min="1" placeholder="e.g., 5" />
+          <div class="field-hint">Hours scale with video length.</div>
+        </div>
+        <div class="field" id="elearningDurationField" style="display:none">
+          <label>Estimated Seat Time (minutes per module)</label>
+          <input type="number" id="newDelElearningDuration" min="1" placeholder="e.g., 20" />
+          <div class="field-hint">Hours scale with seat time. e.g. 20 min module = 20 × hourly rate.</div>
+        </div>
+        <div class="field">
+          <label>Must Have or Nice to Have?</label>
+          <select id="newDelPriority">
+            <option value="must">Must Have</option>
+            <option value="nice">Nice to Have</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Due Date (optional)</label>
+          <input type="date" id="newDelDue" />
+          <div class="field-hint">Leave blank to use the project's Target Completion Date.</div>
+        </div>
+        <div class="field">
+          <label>Notes (optional)</label>
+          <input type="text" id="newDelNotes" placeholder="e.g., includes tool simulations" />
+        </div>
+        <button class="btn btn-green btn-full" onclick="addDeliverable()">Add Deliverable →</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="totals-bar">
+        <div class="tb-item"><div class="tv" id="totalLow">0</div><div class="tl">Low Hrs</div></div>
+        <div class="tb-divider"></div>
+        <div class="tb-item"><div class="tv" id="totalHigh">0</div><div class="tl">High Hrs</div></div>
+        <div class="tb-divider"></div>
+        <div class="tb-item"><div class="tv" id="totalPlan">0</div><div class="tl">Planning Hrs</div></div>
+        <div class="tb-divider"></div>
+        <div class="tb-item"><div class="tv" id="totalDeliverables">0</div><div class="tl">Deliverables</div></div>
+      </div>
+      <div class="card-body" id="deliverableList">
+        <div class="empty-state"><div class="ei">📦</div><p>Add deliverables using the form above.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERATE BUTTON -->
+  <div class="card-full" style="background:transparent;border:none;margin-top:-8px">
+    <div class="actions-row">
+      <button class="btn btn-green" style="flex:1;justify-content:center;padding:14px;font-size:15px" onclick="generateScopeCard()">📄 Generate Scope Card</button>
+      <button class="btn btn-ghost" onclick="resetAll()">↺ Reset All</button>
+    </div>
+  </div>
+
+  <!-- SCOPE CARD -->
+  <div class="scope-card card-full" id="scopeCard">
+    <div class="sc-header">
+      <div>
+        <div class="sc-title" id="sc-name">Project Name</div>
+        <div class="sc-subtitle">ID Project Estimator · Scope Card</div>
+      </div>
+      <div class="sc-badge" id="sc-badge">0 hrs</div>
+    </div>
+    <div class="sc-meta">
+      
+      
+      <div class="sc-meta-item"><div class="sml">Complexity</div><div class="smv" id="sc-complexity">—</div></div>
+      <div class="sc-meta-item"><div class="sml">Target Date</div><div class="smv" id="sc-date">—</div></div>
+    </div>
+    <table class="sc-table">
+      <thead><tr><th>Deliverable</th><th>Modality</th><th>Qty</th><th>Priority</th><th>Low</th><th>High</th><th>Plan</th><th>Notes</th></tr></thead>
+      <tbody id="sc-tbody"></tbody>
+    </table>
+    <div class="sc-factors" id="sc-factors"></div>
+    <div class="sc-totals">
+      <div class="sc-total-item"><div class="stl">Low Estimate</div><div class="stv" id="sc-low">—</div></div>
+      <div class="sc-total-item"><div class="stl">High Estimate</div><div class="stv" id="sc-high">—</div></div>
+      <div class="sc-total-item highlight"><div class="stl">Planning Figure</div><div class="stv" id="sc-plan">—</div></div>
+      <div class="sc-total-item"><div class="stl">Available Hours</div><div class="stv" id="sc-avail">—</div></div>
+    </div>
+    <div class="sc-footer">Generated by ID Toolkit · Project Estimator · Planning figure uses 65th percentile of range for complexity scores above 28; midpoint for 28 and below.</div>
+    <div class="actions-row" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <button class="btn btn-navy btn-sm" onclick="window.print()">🖨️ Print / Save PDF</button>
+      <button class="btn btn-ghost btn-sm" onclick="copyCard()">📋 Copy to Clipboard</button>
+    </div>
+    <button id="sendToPlannerBtn" onclick="sendToPlanner()" style="display:none;width:100%;margin-top:12px;background:#263746;color:white;padding:12px 20px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px;">📅 Send Deliverables to Weekly Planner</button>
+  </div>
+
+</div>
+
+<script>
+// ─── MODALITY DATA ─────────────────────────────────────────────────────────
+const MODALITIES = {
+  elearning_rise: {
+    label: 'eLearning — Rise 360',
+    tiers: { low:[1.5,2.5], mid:[2.5,4], high:[4,6], senior:[5,8] },
+    perMin: true,
+    note: 'Hours per minute of seat time. Includes outline, build, and review cycles.'
+  },
+  elearning_storyline: {
+    label: 'eLearning — Storyline',
+    tiers: { low:[2.5,4], mid:[4,6.5], high:[6.5,10], senior:[9,13] },
+    perMin: true,
+    note: 'Hours per minute of seat time. Includes scripting, interactions, and QA.'
+  },
+  video: {
+    label: 'Video Production',
+    tiers: { low:[3,5], mid:[5,8], high:[8,12], senior:[10,16] },
+    perMin: true,
+    note: 'Hours per minute of finished video. Multiply by duration.'
+  },
+  ilt: {
+    label: 'ILT / Workshop Design',
+    tiers: { low:[10,20], mid:[20,35], high:[35,55], senior:[45,70] },
+    note: 'Per session/day of facilitated content. Includes deck, activities, and facilitator guide.'
+  },
+  jobaid: {
+    label: 'Job Aid / QRG / Infographic',
+    tiers: { low:[4,8], mid:[8,16], high:[16,24], senior:[20,30] },
+    note: 'Per document. Complexity-adjusted for visual design and content depth.'
+  },
+  assessment: {
+    label: 'Assessment Design',
+    tiers: { low:[4,8], mid:[8,14], high:[14,22], senior:[18,28] },
+    note: 'Per assessment (10–20 items). Includes scenario writing and review.'
+  },
+  document: {
+    label: 'Document / SOP / KB Article',
+    tiers: { low:[3,6], mid:[6,12], high:[12,20], senior:[16,26] },
+    note: 'Per document. Includes research, writing, formatting, and review.'
+  },
+  facilitation: {
+    label: 'Facilitation Guide',
+    tiers: { low:[8,14], mid:[14,24], high:[24,38], senior:[30,48] },
+    note: 'Full facilitator guide with script, timing, activities, and debrief notes.'
+  },
+};
+
+const TIME_FACTORS = [
+  { id:'new_sme',    name:'New or Undefined SMEs',             pct:.15, desc:'SMEs not yet identified or confirmed — expect discovery time.' },
+  { id:'new_tool',   name:'New or Unfamiliar Tool',            pct:.25, desc:'First time using this authoring tool or platform.' },
+  { id:'cross_dept', name:'Cross-Department Stakeholders',     pct:.15, desc:'Multiple departments, approvers, or decision makers.' },
+  { id:'exec_vis',   name:'Executive Visibility',              pct:.20, desc:'Senior leadership involvement or high-stakes review cycles.' },
+  { id:'high_review',name:'High Review Rounds (3+)',           pct:.20, desc:'Expected to go through more than 3 formal feedback cycles.' },
+  { id:'compressed', name:'Compressed Timeline (<50% std)',    pct:.25, desc:'Rush projects concentrate risk and increase error rate.' },
+  { id:'compliance', name:'Compliance / HR / Legal Content',   pct:.15, desc:'Requires legal review, accuracy auditing, or policy sign-off.' },
+  { id:'custom_med', name:'Custom Media (graphics/animation)', pct:.20, desc:'Original illustrations, custom animation, or branded visuals.' },
+  { id:'scope_change',name:'Scope Change Mid-Project',         pct:.25, desc:'Significant scope addition after kickoff.' },
+  { id:'multi_aud',  name:'Multiple Audiences',                pct:.10, desc:'Content must be adapted for more than one distinct audience.' },
+];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let deliverables = [];
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+
+// ─── TIER / PLANNING FIGURE ────────────────────────────────────────────────
+function getComplexityBucket(score) {
+  if (!score || score < 1) return null;
+  if (score <= 15) return 'low';
+  if (score <= 27) return 'mid';
+  if (score <= 43) return 'high';
+  return 'senior';
+}
+
+function getTierLabel(score) {
+  if (!score || score < 1) return null;
+  if (score <= 15) return 'CD (1–15)';
+  if (score <= 27) return 'Jr. ID (16–27)';
+  if (score <= 43) return 'ID (28–43)';
+  if (score <= 60) return 'Sr. ID (44–60)';
+  return 'Enterprise (61+)';
+}
+
+function getPlanningFigure(low, high, score) {
+  // 65th percentile for score > 28, midpoint otherwise
+  if (score > 28) return Math.round(low + (high - low) * 0.65);
+  return Math.round((low + high) / 2);
+}
+
+function updateTierDisplay() {
+  const score = parseInt(document.getElementById('complexityScore').value) || 0;
+  const tier = getTierLabel(score);
+  const el = document.getElementById('tierDisplay');
+  if (!tier) { el.textContent = 'Enter your Designer Complexity Score. Use the Complexity &amp; Readiness Scorer (coming soon) for a consistent score.'; return; }
+  el.innerHTML = `Tier: <strong>${tier}</strong> — planning figure uses ${score > 28 ? '65th percentile' : 'midpoint'} of each range.`;
+}
+
+function getRange(modalityKey, score, qty, videoDuration) {
+  const mod = MODALITIES[modalityKey];
+  if (!mod) return { low:0, high:0, plan:0 };
+  const bucket = getComplexityBucket(score) || 'mid';
+  let [baseLow, baseHigh] = mod.tiers[bucket];
+  if (mod.perMin && videoDuration) {
+    baseLow  = baseLow  * videoDuration;
+    baseHigh = baseHigh * videoDuration;
+  }
+  const plan = getPlanningFigure(baseLow, baseHigh, score || 20);
+  return { low: baseLow * qty, high: baseHigh * qty, plan: plan * qty };
+}
+
+// ─── AVAILABLE HOURS ───────────────────────────────────────────────────────
+function getFederalHolidays() {
+  const h = new Set();
+  const years = [2024,2025,2026,2027,2028,2029,2030];
+  function add(y,m,d) {
+    const dt = new Date(y,m-1,d);
+    const dow = dt.getDay();
+    if (dow===6) dt.setDate(dt.getDate()-1);
+    else if (dow===0) dt.setDate(dt.getDate()+1);
+    h.add(dt.toDateString());
+  }
+  function nth(y,m,n,wd) {
+    if (n>0) { const d=new Date(y,m-1,1); let c=0; while(true){if(d.getDay()===wd){c++;if(c===n)return new Date(d);} d.setDate(d.getDate()+1);} }
+    else { const d=new Date(y,m,0); while(d.getDay()!==wd) d.setDate(d.getDate()-1); return new Date(d); }
+  }
+  years.forEach(y=>{
+    add(y,1,1); h.add(nth(y,1,3,1).toDateString()); h.add(nth(y,2,3,1).toDateString());
+    h.add(nth(y,5,-1,1).toDateString()); add(y,6,19); add(y,7,4);
+    h.add(nth(y,9,1,1).toDateString()); h.add(nth(y,10,2,1).toDateString());
+    add(y,11,11); h.add(nth(y,11,4,4).toDateString()); add(y,12,25);
+  });
+  return h;
+}
+const HOLIDAYS = getFederalHolidays();
+function isBD(d) { const w=d.getDay(); return w!==0&&w!==6&&!HOLIDAYS.has(d.toDateString()); }
+
+function updateAvailableHours() {
+  const na   = document.getElementById('naDate').value;
+  const comp = document.getElementById('completionDate').value;
+  const el   = document.getElementById('availableHours');
+  if (!na || !comp) { el.textContent = '—'; return; }
+  const days = countBusinessDays(new Date(na + 'T12:00:00'), new Date(comp + 'T12:00:00'));
+  el.textContent = days > 0 ? `${days * 6} hrs (${days} BD)` : '—';
+}
+
+function countBusinessDays(start, end) {
+  let count = 0, cur = new Date(start);
+  while (cur < end) {
+    cur.setDate(cur.getDate() + 1);
+    if (isBD(cur)) count++;
+  }
+  return count;
+}
+
+// ─── MODALITY CHANGE ───────────────────────────────────────────────────────
+function onModalityChange() {
+  const val = document.getElementById('newDelModality').value;
+  document.getElementById('videoDurationField').style.display = val === 'video' ? 'block' : 'none';
+  document.getElementById('elearningDurationField').style.display = (val === 'elearning_rise' || val === 'elearning_storyline') ? 'block' : 'none';
+}
+
+// ─── ADD DELIVERABLE ───────────────────────────────────────────────────────
+function addDeliverable() {
+  const name     = document.getElementById('newDelName').value.trim();
+  const modality = document.getElementById('newDelModality').value;
+  if (!name)     { alert('Please enter a deliverable name.'); return; }
+  if (!modality) { alert('Please select a modality category.'); return; }
+
+  const score        = parseInt(document.getElementById('complexityScore').value) || 20;
+  const qty          = parseInt(document.getElementById('newDelQty').value) || 1;
+  const videoDur     = parseInt(document.getElementById('newDelVideoDuration').value) || 0;
+  const elearningDur = parseInt(document.getElementById('newDelElearningDuration').value) || 0;
+  const priority     = document.getElementById('newDelPriority').value;
+  const notes        = document.getElementById('newDelNotes').value.trim();
+  const due          = document.getElementById('newDelDue').value || '';
+  const mediaDur     = videoDur || elearningDur;
+  const range        = getRange(modality, score, qty, mediaDur);
+
+  deliverables.push({ id: uid(), name, modality, qty, videoDuration: videoDur, elearningDuration: elearningDur, priority, notes, due, ...range });
+
+  // Reset add form
+  document.getElementById('newDelName').value        = '';
+  document.getElementById('newDelModality').value    = '';
+  document.getElementById('newDelQty').value         = '1';
+  document.getElementById('newDelVideoDuration').value = '';
+  document.getElementById('newDelElearningDuration').value = '';
+  document.getElementById('newDelPriority').value    = 'must';
+  document.getElementById('newDelNotes').value       = '';
+  document.getElementById('newDelDue').value         = '';
+  document.getElementById('videoDurationField').style.display = 'none';
+  document.getElementById('elearningDurationField').style.display = 'none';
+  document.getElementById('sendToPlannerBtn').style.display = 'none';
+  document.getElementById('scopeCard').classList.remove('visible');
+
+  renderDeliverables();
+  updateTotals();
+}
+
+function deleteDeliverable(id) {
+  deliverables = deliverables.filter(d => d.id !== id);
+  renderDeliverables();
+  updateTotals();
+}
+
+// ─── RENDER DELIVERABLES ───────────────────────────────────────────────────
+function renderDeliverables() {
+  const el = document.getElementById('deliverableList');
+  if (!deliverables.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ei">📦</div><p>Add deliverables using the form above.</p></div>`;
+    return;
+  }
+  el.innerHTML = deliverables.map((d, i) => `
+    <div class="deliverable-item">
+      <div class="del-header">
+        <div>
+          <div class="del-name">${escHTML(d.name)}</div>
+          <div style="font-size:11px;color:var(--muted)">${MODALITIES[d.modality]?.label || d.modality} · Qty ${d.qty} · ${d.priority === 'must' ? 'Must Have' : 'Nice to Have'}${d.due ? ` · Due ${escHTML(d.due)}` : ''}</div>
+        </div>
+        <div class="del-range">${d.low}–${d.high} hrs</div>
+        <div class="del-pts">${d.plan} hrs planned</div>
+        <button class="btn btn-danger btn-sm" onclick="deleteDeliverable('${d.id}')">✕</button>
+      </div>
+      ${d.notes ? `<div style="padding:6px 14px 8px;font-size:11px;color:var(--muted);background:white;border-top:1px solid var(--border)">📝 ${escHTML(d.notes)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ─── TOTALS ────────────────────────────────────────────────────────────────
+function getFactorMultiplier() {
+  let total = 0;
+  TIME_FACTORS.forEach(f => {
+    if (document.getElementById('factor_' + f.id)?.checked) total += f.pct;
+  });
+  return 1 + total;
+}
+
+function updateTotals() {
+  const mult    = getFactorMultiplier();
+  const rawLow  = deliverables.reduce((s,d) => s + d.low,  0);
+  const rawHigh = deliverables.reduce((s,d) => s + d.high, 0);
+  const rawPlan = deliverables.reduce((s,d) => s + d.plan, 0);
+  const adjLow  = Math.round(rawLow  * mult);
+  const adjHigh = Math.round(rawHigh * mult);
+  const adjPlan = Math.round(rawPlan * mult);
+  document.getElementById('totalLow').textContent  = adjLow;
+  document.getElementById('totalHigh').textContent = adjHigh;
+  document.getElementById('totalPlan').textContent = adjPlan;
+  document.getElementById('totalDeliverables').textContent = deliverables.length;
+}
+
+function updateEstimates() {
+  // Recalculate deliverable ranges if complexity score changes
+  const score = parseInt(document.getElementById('complexityScore').value) || 20;
+  deliverables = deliverables.map(d => {
+    const mediaDuration = d.videoDuration || d.elearningDuration || 0;
+    const range = getRange(d.modality, score, d.qty, mediaDuration);
+    return { ...d, ...range };
+  });
+  renderDeliverables();
+  updateTotals();
+}
+
+// ─── BUILD FACTORS ────────────────────────────────────────────────────────
+function buildFactors() {
+  const container = document.getElementById('factorList');
+  container.innerHTML = TIME_FACTORS.map(f => `
+    <div class="factor-row">
+      <input type="checkbox" id="factor_${f.id}" onchange="updateTotals()" />
+      <div class="factor-info">
+        <div class="factor-name">${f.name}</div>
+        <div class="factor-desc">${f.desc}</div>
+      </div>
+      <div class="factor-pct">+${Math.round(f.pct*100)}%</div>
+    </div>
+  `).join('');
+}
+
+// ─── SCOPE CARD ────────────────────────────────────────────────────────────
+function generateScopeCard() {
+  if (!deliverables.length) { alert('Add at least one deliverable first.'); return; }
+
+  const name       = document.getElementById('projectName').value || 'Untitled Project';
+
+
+  const score      = parseInt(document.getElementById('complexityScore').value) || 0;
+  const tier       = getTierLabel(score) || '—';
+  const compDate   = document.getElementById('completionDate').value;
+  const availHrs   = document.getElementById('availableHours').textContent;
+  const mult       = getFactorMultiplier();
+  const pctAdded   = Math.round((mult - 1) * 100);
+
+  const adjLow  = Math.round(deliverables.reduce((s,d)=>s+d.low,0)  * mult);
+  const adjHigh = Math.round(deliverables.reduce((s,d)=>s+d.high,0) * mult);
+  const adjPlan = Math.round(deliverables.reduce((s,d)=>s+d.plan,0) * mult);
+
+  document.getElementById('sc-name').textContent        = name;
+  document.getElementById('sc-badge').textContent       = `${adjPlan} hrs planned`;
+
+
+  document.getElementById('sc-complexity').textContent  = score ? `${score} — ${tier}` : '—';
+  document.getElementById('sc-date').textContent        = compDate ? new Date(compDate+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+  document.getElementById('sc-low').textContent         = adjLow + ' hrs';
+  document.getElementById('sc-high').textContent        = adjHigh + ' hrs';
+  document.getElementById('sc-plan').textContent        = adjPlan + ' hrs';
+  document.getElementById('sc-avail').textContent       = availHrs;
+
+  // Table
+  document.getElementById('sc-tbody').innerHTML = deliverables.map(d => `
+    <tr>
+      <td style="font-weight:600">${escHTML(d.name)}</td>
+      <td style="font-size:11px">${MODALITIES[d.modality]?.label || d.modality}</td>
+      <td style="text-align:center">${d.qty}</td>
+      <td style="font-size:11px">${d.priority === 'must' ? '✓ Must' : 'Nice'}</td>
+      <td style="text-align:center">${Math.round(d.low*mult)}</td>
+      <td style="text-align:center">${Math.round(d.high*mult)}</td>
+      <td style="text-align:center;font-weight:700">${Math.round(d.plan*mult)}</td>
+      <td style="font-size:11px;color:#6b7f8c">${escHTML(d.notes)}</td>
+    </tr>
+  `).join('');
+
+  // Factors
+  const activeFactors = TIME_FACTORS.filter(f => document.getElementById('factor_'+f.id)?.checked);
+  document.getElementById('sc-factors').innerHTML = activeFactors.length
+    ? `<strong>Time factors applied (+${pctAdded}% total):</strong> ` + activeFactors.map(f=>`${f.name} (+${Math.round(f.pct*100)}%)`).join(' · ')
+    : '<em>No time factors applied.</em>';
+
+  document.getElementById('scopeCard').classList.add('visible');
+  document.getElementById('scopeCard').scrollIntoView({ behavior:'smooth' });
+  document.getElementById('sendToPlannerBtn').style.display = 'block';
+}
+
+// ─── COPY & RESET ──────────────────────────────────────────────────────────
+function copyCard() {
+  const name    = document.getElementById('sc-name').textContent;
+  const plan    = document.getElementById('sc-plan').textContent;
+  const low     = document.getElementById('sc-low').textContent;
+  const high    = document.getElementById('sc-high').textContent;
+  const avail   = document.getElementById('sc-avail').textContent;
+  const complex = document.getElementById('sc-complexity').textContent;
+  const lines   = [`Project Estimate: ${name}`, `Complexity: ${complex}`, `Available Hours: ${avail}`, '', 'Deliverables:'];
+  deliverables.forEach(d => {
+    lines.push(`  • ${d.name} (${MODALITIES[d.modality]?.label}) × ${d.qty} — ${d.plan} hrs planned`);
+  });
+  lines.push('', `Range: ${low} – ${high}`, `Planning Figure: ${plan}`);
+  navigator.clipboard.writeText(lines.join('\n')).then(() => alert('Scope card copied to clipboard!'));
+}
+
+function resetAll() {
+  if (!confirm('Reset all fields and deliverables?')) return;
+  ['projectName','naDate','completionDate','complexityScore'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('projectPriority').value = 'p3';
+  deliverables = [];
+  TIME_FACTORS.forEach(f => { const el = document.getElementById('factor_'+f.id); if(el) el.checked = false; });
+  document.getElementById('tierDisplay').textContent = 'Enter your Designer Complexity Score. Use the Complexity &amp; Readiness Scorer (coming soon) for a consistent score.';
+  document.getElementById('availableHours').textContent = '—';
+  document.getElementById('scopeCard').classList.remove('visible');
+  renderDeliverables();
+  updateTotals();
+}
+
+function escHTML(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Init
+buildFactors();
+renderDeliverables();
+
+    // Show a banner
+          
+
+// ─── SEND TO WEEKLY PLANNER ───────────────────────────────────────────────
+function sendToPlanner() {
+  if (!deliverables.length) { alert('No deliverables to send.'); return; }
+  const projectName = document.getElementById('projectName').value || 'Untitled Project';
+  const compDate    = document.getElementById('completionDate').value || '';
+  const mult        = getFactorMultiplier();
+  const priority    = document.getElementById('projectPriority').value || 'p3';
+
+  try {
+    // Load existing planner projects
+    let existing = [];
+    try { existing = JSON.parse(localStorage.getItem('idt_projects_v1')) || []; } catch(e) { existing = []; }
+
+    // Create one planner entry per deliverable — each keeps its own due date
+    // if one was set, otherwise falls back to the project's completion date.
+    const newEntries = deliverables.map(d => ({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+      name: projectName + ' — ' + d.name,
+      hrs: Math.round(d.plan * mult),
+      due: d.due || compDate,
+      priority: priority,
+      notes: d.notes || '',
+      fromEstimator: true
+    }));
+
+    const merged = [...existing, ...newEntries];
+    localStorage.setItem('idt_projects_v1', JSON.stringify(merged));
+
+    // Confirm
+    const btn = document.getElementById('sendToPlannerBtn');
+    btn.textContent = '✓ ' + newEntries.length + ' deliverable' + (newEntries.length > 1 ? 's' : '') + ' sent to Planner!';
+    btn.style.background = '#77BC1F';
+    setTimeout(() => {
+      btn.textContent = '📅 Send Deliverables to Weekly Planner';
+      btn.style.background = '#263746';
+    }, 3000);
+  } catch(e) {
+    alert('Could not send to planner. Make sure you are using the same browser for both tools.');
+  }
+}
+
+</script>
+</body>
+</html>
