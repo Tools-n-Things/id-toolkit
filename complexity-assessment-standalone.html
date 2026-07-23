@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complexity Assessment | ID Toolkit</title>
+<style>
+  :root {
+    --navy: #263746; --green: #77BC1F; --blue: #2172B7; --orange: #FF8300; --red: #d63b3b;
+    --navy-xlight: #eef1f4; --green-light: #f0f8e6; --orange-light: #fff4e6; --red-light: #fdf0f0; --blue-light: #eef5fd;
+    --text: #1a2730; --muted: #6b7f8c; --border: #d0dbe3; --white: #ffffff;
+    --radius: 8px; --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Roboto','Segoe UI',sans-serif; background: var(--navy-xlight); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--navy); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 36px; height: 36px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: white; }
+  .header-title { color: white; font-size: 15px; font-weight: 500; opacity: .85; }
+  .header-title span { color: var(--green); font-weight: 700; opacity: 1; }
+  .back-link { color: var(--border); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+  .back-link:hover { color: white; }
+
+  .page-hero { background: var(--navy); padding: 28px 32px 36px; border-bottom: 4px solid var(--green); }
+  .page-hero h1 { color: white; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .page-hero p { color: rgba(255,255,255,.6); font-size: 14px; max-width: 640px; }
+
+  .main { max-width: 900px; margin: 0 auto; padding: 28px 24px 64px; }
+
+  .card { background: var(--white); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+  .card-header { background: var(--navy); padding: 13px 20px; }
+  .card-header h2 { color: white; font-size: 14px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  label { display: block; font-size: 11px; font-weight: 700; color: var(--navy); margin-bottom: 5px; letter-spacing: .5px; text-transform: uppercase; }
+  input[type="text"], select {
+    width: 100%; padding: 9px 11px; border: 1.5px solid var(--border); border-radius: var(--radius);
+    font-size: 13px; font-family: inherit; color: var(--text); background: var(--white);
+  }
+  input:focus, select:focus { outline: none; border-color: var(--blue); }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .btn { padding: 9px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all .2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: #68a619; }
+  .btn-navy { background: var(--navy); color: white; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--navy); color: var(--navy); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-full { width: 100%; justify-content: center; padding: 13px; font-size: 14px; }
+
+  .banner { border-radius: var(--radius); padding: 12px 16px; font-size: 12px; line-height: 1.5; margin-bottom: 16px; background: var(--orange-light); border: 1px solid #ffd199; color: #7a3e00; }
+
+  /* CATEGORY BLOCKS */
+  .cat-block { border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+  .cat-head { background: var(--navy); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .cat-head .cat-name { font-size: 14px; font-weight: 700; }
+  .cat-head .cat-weight { font-size: 11px; background: rgba(255,255,255,.15); padding: 3px 8px; border-radius: 4px; }
+  .cat-question { background: var(--orange-light); padding: 10px 16px; font-size: 12px; font-style: italic; color: #7a3e00; }
+  .cat-levels { padding: 12px 16px; }
+  .level-row { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--navy-xlight); font-size: 12px; }
+  .level-row:last-child { border-bottom: none; }
+  .level-num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--navy-xlight); color: var(--navy); font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+  .level-text { flex: 1; }
+  .level-text .anchor { color: var(--text); }
+  .level-text .example { color: var(--muted); font-style: italic; margin-top: 2px; }
+  .cat-input-row { padding: 12px 16px; background: var(--navy-xlight); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .cat-input-row select { width: 90px; }
+  .trigger-pill { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: var(--red-light); color: var(--red); border: 1px solid #f5a0a0; display: none; }
+  .trigger-pill.show { display: inline-block; }
+
+  /* LIVE SCORECARD */
+  .scorecard { position: sticky; top: 0; z-index: 10; background: var(--navy); border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 14px 20px; display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+  .sc-item .scv { font-size: 20px; font-weight: 900; color: var(--green); }
+  .sc-item .scl { font-size: 10px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .4px; }
+  .sc-divider { width: 1px; height: 30px; background: rgba(255,255,255,.15); }
+
+  /* SUMMARY CARD */
+  .summary-card { display: none; background: white; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 28px; margin-top: 20px; }
+  .summary-card.visible { display: block; }
+  .sum-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 3px solid var(--navy); }
+  .sum-title { font-size: 20px; font-weight: 800; color: var(--navy); }
+  .sum-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .sum-badge { font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 8px; background: var(--green-light); color: #3a6600; border: 2px solid var(--green); }
+  .sum-meta { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 20px; }
+  .sum-meta-item { background: var(--navy-xlight); border-radius: var(--radius); padding: 10px 12px; }
+  .sum-meta-item .sml { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+  .sum-meta-item .smv { font-size: 14px; font-weight: 800; color: var(--navy); margin-top: 2px; }
+  .sum-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
+  .sum-table th { background: var(--navy); color: white; padding: 8px 10px; font-weight: 600; text-align: left; }
+  .sum-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  .sum-table tr:nth-child(even) td { background: var(--navy-xlight); }
+  .sum-footer { font-size: 11px; color: var(--muted); text-align: center; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 8px; }
+  .actions-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+  @media print {
+    header, .page-hero, .card:not(.summary-card), .actions-row, .btn { display: none !important; }
+    .summary-card { display: block !important; border: none; padding: 0; }
+    .main { padding: 0; max-width: 100%; }
+    body { background: white; }
+  }
+  @media (max-width: 680px) {
+    .form-row { grid-template-columns: 1fr; }
+    .sum-meta { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="header-logo">ID</div>
+    <div class="header-title"><span>ID Toolkit</span></div>
+  </div>
+  <a href="index.html" class="back-link">← All Tools</a>
+</header>
+
+<div class="page-hero">
+  <h1>🧩 Complexity Assessment</h1>
+  <p>Score the instructional/creative/technical complexity of a project after the Learning Strategy Session. Generates a summary card you can print, save as PDF, or copy into an email or Monday.com update.</p>
+</div>
+
+<div class="main">
+
+  <div class="banner">
+    This tool is for <strong>Standard Projects only</strong>, scored after the Learning Strategy Session. Program Overhauls are sized separately with the Content Debt Audit and Program Planner — don't score them here.
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h2>Project Info</h2></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="field">
+          <label>Your Name (Designer)</label>
+          <input type="text" id="designerName" placeholder="e.g., Jamie Rivera" />
+        </div>
+        <div class="field">
+          <label>Project Name</label>
+          <input type="text" id="projectName" placeholder="e.g., New Hire Security Awareness" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="scorecard">
+      <div class="sc-item"><div class="scv" id="liveWeighted">0</div><div class="scl">Weighted Score</div></div>
+      <div class="sc-divider"></div>
+      <div class="sc-item"><div class="scv" id="liveTier" style="font-size:14px">—</div><div class="scl">Recommended Assignment</div></div>
+      <div class="sc-divider"></div>
+      <div class="sc-item"><div class="scv" id="liveTrigger" style="font-size:14px">No</div><div class="scl">Senior Trigger</div></div>
+    </div>
+    <div class="card-body" id="categoriesContainer"></div>
+  </div>
+
+  <div class="card" style="background:transparent;border:none">
+    <div class="actions-row">
+      <button class="btn btn-green" style="flex:1;justify-content:center;padding:14px;font-size:15px" onclick="generateSummary()">📄 Generate Summary Card</button>
+      <button class="btn btn-ghost" onclick="resetAll()">↺ Reset All</button>
+    </div>
+  </div>
+
+  <div class="summary-card" id="summaryCard">
+    <div class="sum-header">
+      <div>
+        <div class="sum-title" id="sum-name">Project Name</div>
+        <div class="sum-subtitle">ID Toolkit · Complexity Assessment Summary</div>
+      </div>
+      <div class="sum-badge" id="sum-badge">— tier</div>
+    </div>
+    <div class="sum-meta">
+      <div class="sum-meta-item"><div class="sml">Designer</div><div class="smv" id="sum-designer">—</div></div>
+      <div class="sum-meta-item"><div class="sml">Date</div><div class="smv" id="sum-date">—</div></div>
+    </div>
+    <table class="sum-table">
+      <thead><tr><th>Category</th><th>Weight</th><th>Level Selected</th><th>Weighted</th></tr></thead>
+      <tbody id="sum-tbody"></tbody>
+    </table>
+    <div class="sum-meta">
+      <div class="sum-meta-item"><div class="sml">Weighted Score (10–50)</div><div class="smv" id="sum-weighted">—</div></div>
+      <div class="sum-meta-item"><div class="sml">Senior Review Trigger</div><div class="smv" id="sum-trigger">—</div></div>
+    </div>
+    <div class="sum-footer">Generated by ID Toolkit · Complexity Assessment · Tiers: CD 10–19 · ID I 20–29 · ID II 30–39 · Sr. ID 40–50 (or any 4/5 on a double-weighted category)</div>
+    <div class="actions-row" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <button class="btn btn-navy btn-sm" onclick="window.print()">🖨️ Print / Save PDF</button>
+      <button class="btn btn-ghost btn-sm" onclick="copySummary()">📋 Copy to Clipboard</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── CATEGORY DEFINITIONS (identical to the connected Claude artifact) ─────
+const CATEGORIES = [
+  { id: 'content_transformation', name: 'Content Transformation', weight: 1,
+    question: 'How much instructional thinking is required to turn the available source material into effective learning?',
+    levels: [
+      ['Source material is current, complete, and already organized for instruction.', 'An existing, up-to-date course outline ready to build from.'],
+      ['Existing learning content needs light restructuring or rewriting.', 'Updating an outdated onboarding module.'],
+      ['Raw policies, procedures, technical documents, or SME notes must be transformed into instruction.', 'Turning a compliance policy PDF into a training module.'],
+      ['Source material is incomplete, conflicting, or requires major synthesis and instructional judgment.', "Reconciling three SMEs' contradictory process notes."],
+      ['Little usable source material exists; the designer must create the instructional structure largely from scratch.', 'Building training for a brand-new internal tool with no documentation.']
+    ]},
+  { id: 'instructional_strategy', name: 'Instructional Strategy', weight: 2,
+    question: 'How much expertise is required to select and design the instructional approach most likely to achieve the performance outcome?',
+    levels: [
+      ['Strategy is already defined and uses information sharing or simple recall.', 'A slide-based policy update.'],
+      ['Designer selects among established approaches and adds guided practice or knowledge checks.', 'A module with a knowledge-check quiz.'],
+      ['Designer independently selects and designs scenario-based or applied practice.', 'A customer-service scenario walkthrough.'],
+      ['Designer designs branching, simulation, complex decision practice, or a strategy requiring advanced judgment.', 'A branching negotiation simulation.'],
+      ['Designer creates or validates a novel, immersive, adaptive, or enterprise performance solution.', 'An adaptive leadership simulation used org-wide.']
+    ]},
+  { id: 'solution_architecture', name: 'Solution Architecture', weight: 1,
+    question: 'How complex and interdependent is the structure of the learning solution?',
+    levels: [
+      ['Single asset or linear learning experience with no meaningful dependencies.', 'A one-page job aid.'],
+      ['Single course with several connected components but limited dependency.', 'A 3-module course covering one topic.'],
+      ['Blended solution or multiple assets that must align to one performance outcome.', 'eLearning + live workshop + job aid.'],
+      ['Interdependent curriculum, branching structure, or learning journey requiring sequencing and governance.', 'A 5-course certification path.'],
+      ['Enterprise ecosystem with tightly connected pathways, reinforcement, reporting, or downstream dependencies.', 'A company-wide leadership development journey.']
+    ]},
+  { id: 'visual_communication', name: 'Visual Communication', weight: 1,
+    question: 'How sophisticated must the visual or media communication be to make the content understandable and usable?',
+    levels: [
+      ['Existing templates and assets communicate the content adequately.', 'Standard Rise template, no new graphics.'],
+      ['Light customization, layout, or simple narration is required.', 'Adding narration to existing slides.'],
+      ['Custom graphics, diagrams, infographics, or edited media are needed to clarify learning.', 'A custom process-flow infographic.'],
+      ['Advanced visual storytelling, motion, or a new visual system is required.', 'An animated explainer video.'],
+      ['The solution depends on a highly produced multimedia or visual experience to make complex ideas usable.', 'A fully produced docu-style video series.']
+    ]},
+  { id: 'technical_development', name: 'Technical Development', weight: 1,
+    question: 'How advanced is the implementation required beyond standard authoring-tool functionality?',
+    levels: [
+      ['Standard Rise, Storyline, PowerPoint, or LMS functionality.', 'Default Storyline slide layouts.'],
+      ['Moderate triggers, states, layers, interactions, or tool customization.', 'Custom states for a drag-and-drop interaction.'],
+      ['Advanced variables, conditional logic, simulations, or a custom HTML code block.', 'A scored branching simulation using variables.'],
+      ['Multiple custom components, complex troubleshooting, or integration across tools.', 'Embedding a custom web component in Storyline.'],
+      ['Novel technical implementation, embedded application, or solution without an established build pattern.', 'A custom-coded interactive tool with no prior template.']
+    ]},
+  { id: 'design_ambiguity', name: 'Design Ambiguity', weight: 2,
+    question: 'How much of the problem, success criteria, or solution must the designer define rather than adapt from an established model?',
+    levels: [
+      ['The problem, audience, outcome, and solution are clearly defined with an established precedent.', 'Refreshing an existing annual compliance course.'],
+      ['Minor design choices remain, but templates or prior examples provide direction.', "Adapting a sister team's course template."],
+      ['The designer must define meaningful parts of the solution and make independent tradeoffs.', 'Choosing between two viable instructional approaches with no precedent.'],
+      ['The designer must frame the problem, establish success criteria, and defend significant design decisions.', 'Defining what "competent" looks like for a brand-new role.'],
+      ["No established model exists; the designer must create and justify a strategic solution under substantial uncertainty.", "Designing training for a process that doesn't exist yet."]
+    ]},
+  { id: 'systems_thinking', name: 'Systems Thinking', weight: 2,
+    question: 'How much must the solution keep multiple audiences, requirements, systems, compliance needs, or downstream dependencies aligned?',
+    levels: [
+      ['One audience and one learning context with no meaningful downstream impact.', 'A single-team process update.'],
+      ['Minor audience variations or simple alignment with one related asset or process.', 'Two role-based variants of the same course.'],
+      ['Multiple audiences, systems, or related assets must remain consistent.', 'A course feeding into three different certification tracks.'],
+      ['Compliance, certification, reporting, or downstream dependencies create significant interconnected risk.', 'A regulatory training with audit reporting requirements.'],
+      ['Enterprise-wide solution requiring alignment across audiences, systems, governance, and long-term dependencies.', 'A global compliance program feeding multiple regulatory systems.']
+    ]}
+];
+
+// Single source of truth for tier bands: 10-50 weighted scale
+// 10–19 CD | 20–29 ID I | 30–39 ID II | 40–50 Sr. ID
+// A 4 or 5 on any double-weighted category always forces Sr. ID.
+function computeTier(weighted, senior) {
+  if (senior) return 'Sr. ID';
+  if (weighted <= 19) return 'CD';
+  if (weighted <= 29) return 'ID I';
+  if (weighted <= 39) return 'ID II';
+  return 'Sr. ID';
+}
+
+function computeWeightedAndTrigger() {
+  let weighted = 0, senior = false;
+  CATEGORIES.forEach(c => {
+    if (scores[c.id]) {
+      weighted += scores[c.id] * c.weight;
+      if (c.weight === 2 && scores[c.id] >= 4) senior = true;
+    }
+  });
+  return { weighted, senior };
+}
+
+let scores = {};
+
+// ─── RENDER CATEGORIES ───────────────────────────────────────────────────
+function renderCategories() {
+  const container = document.getElementById('categoriesContainer');
+  container.innerHTML = CATEGORIES.map(cat => `
+    <div class="cat-block" id="block_${cat.id}">
+      <div class="cat-head">
+        <span class="cat-name">${cat.name}</span>
+        <span class="cat-weight">Weight ${cat.weight}x</span>
+      </div>
+      <div class="cat-question">${cat.question}</div>
+      <div class="cat-levels">
+        ${cat.levels.map((lv, i) => `
+          <div class="level-row">
+            <div class="level-num">${i+1}</div>
+            <div class="level-text">
+              <div class="anchor">${lv[0]}</div>
+              <div class="example">Example: ${lv[1]}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="cat-input-row">
+        <label style="margin:0; text-transform:none; font-size:12px; font-weight:600;">Selected Level</label>
+        <select onchange="setScore('${cat.id}', this.value)" id="select_${cat.id}">
+          <option value="">—</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+        <span class="trigger-pill" id="trigger_${cat.id}">⚠ Senior Review</span>
+      </div>
+    </div>
+  `).join('');
+}
+renderCategories();
+
+function setScore(catId, val) {
+  scores[catId] = val ? parseInt(val) : null;
+  const cat = CATEGORIES.find(c => c.id === catId);
+  const pill = document.getElementById('trigger_' + catId);
+  if (cat.weight === 2 && scores[catId] >= 4) pill.classList.add('show');
+  else pill.classList.remove('show');
+  updateLiveScore();
+}
+
+function updateLiveScore() {
+  const filled = CATEGORIES.filter(c => scores[c.id]);
+  const { weighted, senior } = computeWeightedAndTrigger();
+  document.getElementById('liveWeighted').textContent = filled.length === CATEGORIES.length ? weighted : '—';
+  document.getElementById('liveTrigger').textContent = senior ? 'Yes' : 'No';
+  document.getElementById('liveTier').textContent = filled.length === CATEGORIES.length ? computeTier(weighted, senior) : '—';
+}
+
+function escHTML(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ─── GENERATE SUMMARY CARD ───────────────────────────────────────────────
+function generateSummary() {
+  const filled = CATEGORIES.filter(c => scores[c.id]);
+  if (filled.length < CATEGORIES.length) { alert('Score all 7 categories before generating a summary.'); return; }
+
+  const designer = document.getElementById('designerName').value || 'Unnamed Designer';
+  const projectName = document.getElementById('projectName').value || 'Untitled Project';
+  const { weighted, senior } = computeWeightedAndTrigger();
+  const tier = computeTier(weighted, senior);
+
+  document.getElementById('sum-name').textContent = projectName;
+  document.getElementById('sum-badge').textContent = tier;
+  document.getElementById('sum-designer').textContent = designer;
+  document.getElementById('sum-date').textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  document.getElementById('sum-weighted').textContent = weighted + ' / 50';
+  document.getElementById('sum-trigger').textContent = senior ? 'Yes — Sr. ID Required' : 'No';
+
+  document.getElementById('sum-tbody').innerHTML = CATEGORIES.map(c => `
+    <tr>
+      <td style="font-weight:600">${escHTML(c.name)}</td>
+      <td>${c.weight}x</td>
+      <td style="text-align:center">${scores[c.id]}</td>
+      <td style="text-align:center;font-weight:700">${scores[c.id] * c.weight}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('summaryCard').classList.add('visible');
+  document.getElementById('summaryCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function copySummary() {
+  const designer = document.getElementById('sum-designer').textContent;
+  const projectName = document.getElementById('sum-name').textContent;
+  const date = document.getElementById('sum-date').textContent;
+  const tier = document.getElementById('sum-badge').textContent;
+  const weighted = document.getElementById('sum-weighted').textContent;
+  const trigger = document.getElementById('sum-trigger').textContent;
+
+  const lines = [
+    `Complexity Assessment: ${projectName}`,
+    `Designer: ${designer}    Date: ${date}`,
+    `Recommended Assignment: ${tier}    Weighted Score: ${weighted}`,
+    `Senior Review Trigger: ${trigger}`,
+    '',
+    'Category Breakdown:'
+  ];
+  CATEGORIES.forEach(c => {
+    lines.push(`  • ${c.name} (${c.weight}x): Level ${scores[c.id]} → ${scores[c.id] * c.weight} pts`);
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => alert('Summary copied to clipboard!'));
+}
+
+function resetAll() {
+  if (!confirm('Reset all fields and scores?')) return;
+  document.getElementById('designerName').value = '';
+  document.getElementById('projectName').value = '';
+  scores = {};
+  CATEGORIES.forEach(c => { const el = document.getElementById('select_' + c.id); if (el) el.value = ''; document.getElementById('trigger_' + c.id).classList.remove('show'); });
+  document.getElementById('summaryCard').classList.remove('visible');
+  updateLiveScore();
+}
+</script>
+</body>
+</html>
